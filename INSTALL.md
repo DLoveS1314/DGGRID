@@ -17,7 +17,8 @@ Acquire the code with:
 
 Building DGGRID
 ------------------
-
+if change cmakelist.txt should delete build 
+**rm -rf build**
 Build the application dggrid by executing:
 
     mkdir build                         # Make a directory to compile into
