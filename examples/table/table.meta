@@ -11,6 +11,6 @@
 dggrid_operation OUTPUT_STATS
 
 # specify the DGG
-dggs_type ISEA43H
-dggs_num_aperture_4_res 5
-dggs_res_spec 15
+dggs_type ISEA4H
+dggs_res_spec 1
+ 
