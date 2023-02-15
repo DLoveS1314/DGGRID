@@ -106,7 +106,7 @@ class DgIDGGSBase : public DgDiscRFS<DgQ2DICoord, DgGeoCoord, long double> {
 
    private:
 
-      const DgGeoSphRF& geoRF_;
+      const DgGeoSphRF& geoRF_;//参数中的 backFrame
 
       DgGeoCoord vert0_;
       long double azDegs_;

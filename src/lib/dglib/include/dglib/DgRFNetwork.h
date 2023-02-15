@@ -35,7 +35,9 @@ class DgLocation;
 class DgRFBase;
 class DgConverterBase;
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////
+/// 存储坐标空间和转换器 实现不同坐标空间的转换 贲进老师书籍中的CGNetwork类 存储router 和switch
+//////////////////////////////////////////////////////
 class DgRFNetwork {
 
    public:
@@ -83,9 +85,9 @@ class DgRFNetwork {
 
       int chunkSize_;
 
-      vector< DgRFBase* > frames_;
+      vector< DgRFBase* > frames_;//保存坐标空间指针的vector 贲进老师：router router只保存最后一次的路由信息 
 
-      vector< vector<DgConverterBase*> > matrix_;
+      vector< vector<DgConverterBase*> > matrix_;//保存抓换器指针的vector 贲进老师：switch  switch 是个矩阵 保存所有的相关信息
 
       int generateId (DgRFBase* frame);
 

@@ -52,7 +52,7 @@ DgBoundedIDGG::DgBoundedIDGG (const DgIDGGBase& IDGGin)
       setLastAdd(DgQ2DICoord(10, DgIVec2D(idgg().maxI(), idgg().maxJ())));
 
       if (idgg().gridTopo() == dgg::topo::Triangle)
-         offsetPerQuad_ = idgg().mag() * (idgg().maxJ() + 1);
+         offsetPerQuad_ = idgg().mag() * (idgg().maxJ() + 1);//计算每个面对应的格网数
       else
          offsetPerQuad_ = idgg().mag() * idgg().mag();
    }
@@ -84,7 +84,7 @@ DgBoundedIDGG::DgBoundedIDGG (const DgIDGGBase& IDGGin)
 
    // calculate the total size
    size_ = 10 * offsetPerQuad();
-   if (firstAdd().quadNum() == 0) size_ += 2;
+   if (firstAdd().quadNum() == 0) size_ += 2;//针对六边形
 
    // validate the size
    unsigned long long int tmpSize = size();
@@ -232,7 +232,7 @@ DgBoundedIDGG::addFromSeqNum (unsigned long long int sNum) const
 } 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Take a point that may lie off it's quad and get it on the correct quad
+/// Take a point that may lie off it's quad and get it on the correct quad 处理跨邻域的格网问题
 DgQ2DICoord 
 DgBoundedIDGG::q2dixToQ2di (const DgQ2DICoord& add) const
 {

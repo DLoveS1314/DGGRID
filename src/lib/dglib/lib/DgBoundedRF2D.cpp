@@ -56,7 +56,7 @@ DgBoundedRF2D::DgBoundedRF2D (const DgDiscRF<DgIVec2D, DgDVec2D, long double>& r
    
 } // DgBoundedRF2D::DgBoundedRF2D
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////把地址增加1 因为是行优先 所以优先加列 如果列到了最大值 再加一行 列变成0///////////////////////////////////////////////
 DgIVec2D&
 DgBoundedRF2D::incrementAddress (DgIVec2D& add) const
 {

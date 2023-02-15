@@ -193,7 +193,7 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
       static const DgQuadEdgeCells edgeTable_[12];
 
       // local internal network
-
+        //建立自己的局部路由
       DgRFNetwork locNet_;
 
       const DgDiscRF2D* grid2D_;

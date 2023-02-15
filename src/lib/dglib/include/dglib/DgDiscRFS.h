@@ -36,7 +36,7 @@
 #include <dglib/DgPolygon.h>
 #include <dglib/DgRF.h>
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////带编码和等级的综合体///////////////////////////////////////////////
 template<class A> class DgResAdd {
 
    public:
@@ -485,7 +485,7 @@ template<class A, class B, class DB> class DgDiscRFS
 
       unsigned int aperture_;
 
-      vector<const DgDiscRF<A, B, DB>*>* grids_;
+      vector<const DgDiscRF<A, B, DB>*>* grids_;//存储多层格网的关键所在 ，将IDGG（DgDiscRF的子类） 和IDGGS （DgDiscRF的子类）联系起来
 
       int nRes_;
       bool isCongruent_;

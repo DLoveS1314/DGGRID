@@ -21,12 +21,12 @@ geodetic_densify 0.0
 # specify the output
 
 neighbor_output_type TEXT
-neighbor_output_file_name outputfiles/neighbors
+neighbor_output_file_name /home/dls/data/openmmlab/DGGRID/src/apps/dggrid/outputfiles/neighbors
 children_output_type TEXT
-children_output_file_name outputfiles/children
-cell_output_file_name  None
-point_output_type KML
-point_output_file_name outputfiles/dmd_4_point
+children_output_file_name /home/dls/data/openmmlab/DGGRID/src/apps/dggrid/outputfiles/children
+#cell_output_file_name  None
+#point_output_type KML
+#point_output_file_name outputfiles/dmd_4_point
  
 densification 0
 precision 6

@@ -30,7 +30,7 @@ void
 DgDmdD8Grid2D::setAddNeighbors (const DgIVec2D& add, DgLocVector& vec) const
 {
    vector<DgAddressBase*>& v = vec.addressVec();
-
+//只写了点在内部的情况
    v.push_back(new DgAddress<DgIVec2D>(DgIVec2D(add.i(), add.j() + 1)));
    v.push_back(new DgAddress<DgIVec2D>(DgIVec2D(add.i() - 1, add.j() + 1)));
    v.push_back(new DgAddress<DgIVec2D>(DgIVec2D(add.i() - 1, add.j())));

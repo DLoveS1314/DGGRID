@@ -108,7 +108,7 @@ DgRF<A, D>::createCell (const NuCell& cell, bool conv) const
 } // NuCell* DgRF<A>::createCell
 #endif
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////根据坐标类A 如DgGeoCoord 生成 相应坐标空间 DgRF<A, D> 标识 也就是 知道我这个坐标在哪个坐标空间内 便于转换/////////////////////////////////////////////////
 template<class A, class D> DgLocation*
 DgRF<A, D>::makeLocation (const A& addIn) const
 {

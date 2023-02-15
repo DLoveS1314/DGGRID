@@ -32,7 +32,7 @@
 
 using namespace dgg::topo;
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////backFrameIn属于DgContCartRF 过渡空间//////////////////////////////////////////////
 DgDmdD4Grid2DS::DgDmdD4Grid2DS (DgRFNetwork& networkIn,
                const DgRF<DgDVec2D, long double>& backFrameIn, int nResIn,
                unsigned int apertureIn, bool isCongruentIn, bool isAlignedIn,
@@ -40,7 +40,7 @@ DgDmdD4Grid2DS::DgDmdD4Grid2DS (DgRFNetwork& networkIn,
         : DgDiscRFS2D (networkIn, backFrameIn, nResIn, apertureIn, Diamond, D4,
                        isCongruentIn, isAlignedIn, nameIn)
 {
-   // determine the radix
+   // determine the radix = 2
    radix_ = static_cast<int>(sqrt(static_cast<float>(aperture())));
    if (static_cast<unsigned int>(radix() * radix()) != aperture())
    {
@@ -87,7 +87,7 @@ DgDmdD4Grid2DS::DgDmdD4Grid2DS (DgRFNetwork& networkIn,
       string newName = name() + "_" + dgg::util::to_string(i);
 
       //cout << newName << " " << fac << ' ' << trans << endl;
-
+        //构建转换器的过程
       const DgContCartRF* ccRF = DgContCartRF::makeRF(network(), newName + string("bf"));
 
       Dg2WayContAffineConverter(backFrame(), *ccRF, (long double) fac, 0.0, trans);

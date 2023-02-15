@@ -87,7 +87,7 @@ DgDmdIDGG::initialize (void)
 
    // create some internal data structures
    setUndefLoc(makeLocation(undefAddress()));
-   sphIcosa_ = new DgSphIcosa(vert0(), azDegs());
+   sphIcosa_ = new DgSphIcosa(vert0(), azDegs());//根据 方位角和指定的经纬度确定球面的方向 并提前计算一些投影转换参数
 
    isAligned_ = false;
    isCongruent_ = false;
@@ -96,7 +96,7 @@ DgDmdIDGG::initialize (void)
    long double parentScaleFac = 1.0;
    unsigned long long int parentNCells = 1;
 
-   // get actual parent values if there is a parent grid
+   // get actual parent values if there is a parent grid 循环创建dggs
    if (res() > 0) {
       const DgDmdIDGG& parentIDGG = dmdDggs().dmdIdgg(res() - 1);
 
@@ -105,7 +105,7 @@ DgDmdIDGG::initialize (void)
    }
 
    // set-up local network to scale so that quad (and consequently dmd) edge
-   // length is 1.0
+   // length is 1.0 信息保存在了局部路由里locNet_ ccFrame_单位是 double x double y 属于过渡坐标系坐标
    ccFrame_ = DgContCartRF::makeRF(locNet_, name() + "CC1");
    if (gridMetric() == D4)
       grid2DS_ = DgDmdD4Grid2DS::makeRF(locNet_, ccFrame(), res() + 1, 4, true, false, name() + string("D4H2DS"));
@@ -117,18 +117,18 @@ DgDmdIDGG::initialize (void)
    if (res() == 0)
       maxD_ = 0;
    else {
-      double factor = parentScaleFac * 2.0L; // aperture 4
+      double factor = parentScaleFac * 2.0L; // aperture 4 每次二分
 
       scaleFac_ = factor;
-      maxD_ = factor - 1.0L;
+      maxD_ = factor - 1.0L;//行从0开始计算
 
       //cout << res() << " " << aperture();
       //cout << " f: " << factor << " maxD: " << maxD_ << endl;
    }
 
-   maxI_ = maxD();
-   maxJ_ = maxD();
-   mag_ = maxD() + 1;
+   maxI_ = maxD();//返回值是int类型 maxD_是float类型
+   maxJ_ = maxD();//菱形的行列大小事一样的 不同网格 算法不同
+   mag_ = maxD() + 1;//未发现有什么用 g代表什么意思？在三角形格网有用 计算DgBoundedIDGG的时候offsetPerQuad_ 有用
    firstAdd_ = DgQ2DICoord(1, DgIVec2D(0, 0));
    lastAdd_ = DgQ2DICoord(10, DgIVec2D(maxI(), maxJ()));
 

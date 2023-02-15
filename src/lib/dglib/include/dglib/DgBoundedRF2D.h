@@ -86,9 +86,9 @@ class DgBoundedRF2D : public DgBoundedRF<DgIVec2D, DgDVec2D, long double> {
 
       const DgDiscRF<DgIVec2D, DgDVec2D, long double>& discRF_;
       
-      DgIVec2D lowerLeft_;
-      DgIVec2D upperRight_;
-      long long int numI_, numJ_;
+      DgIVec2D lowerLeft_;//左下角行号 列号
+      DgIVec2D upperRight_;// 右上角 行号 列号
+      long long int numI_, numJ_;//每个面的行数和列数
 
 };
 

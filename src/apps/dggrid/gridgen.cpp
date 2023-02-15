@@ -1094,8 +1094,8 @@ void genGrid (GridGenParam& dp)
 {
    ////// create the reference frames ////////
 
-   DgRFNetwork net0;
-   const DgGeoSphRF& geoRF = *(DgGeoSphRF::makeRF(net0, dp.datum, dp.earthRadius));
+   DgRFNetwork net0;//存储坐标空间和转换器 
+   const DgGeoSphRF& geoRF = *(DgGeoSphRF::makeRF(net0, dp.datum, dp.earthRadius));//球面空间
    const DgIDGGSBase *dggs = DgIDGGSBase::makeRF(net0, geoRF, dp.vert0,
              dp.azimuthDegs, dp.aperture, dp.actualRes+2, dp.gridTopo,
              dp.gridMetric, "IDGGS", dp.projType, dp.isMixed43, dp.numAp4,
@@ -1118,9 +1118,11 @@ void genGrid (GridGenParam& dp)
    string childrenOutFileName = dp.childrenOutFileName;
    string collectOutFileName = dp.collectOutFileName;
    bool makeCollectFile = false;
+   //一系列的输出参数设置
 
    if (dp.maxCellsPerFile)
    {
+      //如果限制了每个文件输出的单元数量那么先从后面加个1
       string numStr = string("_") + dgg::util::to_string(dp.nOutputFile);
       cellOutFileName += numStr;
       ptOutFileName += numStr;
@@ -1204,7 +1206,7 @@ void genGrid (GridGenParam& dp)
       dp.chdOut = new DgOutChildrenFile(childrenOutFileName, "chd");
 
    ////// do applicable clipping mode /////
-
+   //局部格网生成 提供seqnum 生成格网
    if (dp.seqToPoly) {
       dp.nCellsAccepted = 0;
       dp.nCellsTested = 0;

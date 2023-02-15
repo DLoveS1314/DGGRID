@@ -2,9 +2,10 @@
 
 dggridExe=../../build/src/apps/dggrid/dggrid
 # f="aigenerate"
-f="genChildren" #文件夹所在路径
-fmeta="genchildren" #meta名字
-# fmeta="gridgenDiamond" #meta名字
+# f="genChildren" #文件夹所在路径
+f="gridgenDiamond" #文件夹所在路径
+# fmeta="genchildren" #meta名字
+fmeta="gridgenDiamond" #meta名字
 
  
 # fmeta="transformseq2geo"
