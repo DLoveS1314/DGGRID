@@ -114,7 +114,7 @@ operator<< (ostream& stream, const DgQ2DICoord& coord)
 { return stream << string(coord); }
 
 ////////////////////////////////////////////////////////////////////////////////
-//
+//  归算坐标空间
 //   Coordinate consisting of vertex number and (x, y) coordinates.
 //
 class DgQ2DDCoord  {

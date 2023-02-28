@@ -111,7 +111,7 @@ DgIDGGBase::DgIDGGBase (const DgIDGGSBase* dggs, const DgGeoSphRF& geoRF,
      dggs_ (dggs), sphIcosa_(0), aperture_(aperture), res_(res),
      precision_(precision), grid2D_(0), grid2DS_(0), ccFrame_(0),
      projTriRF_(0), vertexRF_(0), q2ddRF_(0), bndRF_(0), intRF_(0), planeRF_(0)
-{
+{//参数在相应的子类中进行初始化 如DgDmdIDGG::initialize
    //initialize();
 
 } // DgIDGGBase::DgIDGGBase
@@ -147,7 +147,7 @@ DgIDGGBase::createConverters (void)
    bndRF_ = new DgBoundedIDGG(*this);
    //cout << "== BNDRF:: " << string(*bndRF_) << endl;
 
-   // create the intermediate RFs
+   // create the intermediate RFs 是全局转换器
 
    projTriRF_ = DgProjTriRF::makeRF(network(), name() + string("projTri"),
                 sphIcosa_);
@@ -167,16 +167,16 @@ DgIDGGBase::createConverters (void)
    else
       report("DgIDGGBase::initialize(): invalid projection type " + projType(),
              DgBase::Fatal);
-
+    //正算，从经纬度 （ DgGeoSphRF）到离散格网空间 q ,i j 标识
    const DgConverterBase* c1to2 = &(icosaProj->forward());
    const DgConverterBase* c2to3 = new DgProjTriToVertex2DD(projTriRF(), vertexRF());
    const DgConverterBase* c3to4 = new DgVertex2DDToQ2DDConverter(vertexRF(), q2ddRF());
    const DgConverterBase* c4to5 = new DgQ2DDtoIConverter(q2ddRF(), *this);
-
-   const DgConverterBase* c5to4 = new DgQ2DItoDConverter(*this, q2ddRF());
-   const DgConverterBase* c4to3 = new DgQ2DDtoVertex2DDConverter(q2ddRF(), vertexRF());
-   const DgConverterBase* c3to2 = new DgVertex2DDtoProjTri(vertexRF(), projTriRF());
-   const DgConverterBase* c2to1 = &(icosaProj->inverse());
+    //反算，从离散格网空间 q ,i j 到标识经纬度 （ DgGeoSphRF）
+   const DgConverterBase* c5to4 = new DgQ2DItoDConverter(*this, q2ddRF()); //离散空间到归算空间
+   const DgConverterBase* c4to3 = new DgQ2DDtoVertex2DDConverter(q2ddRF(), vertexRF());//归算空间到顶点空间
+   const DgConverterBase* c3to2 = new DgVertex2DDtoProjTri(vertexRF(), projTriRF());//顶点空间到投影空间
+   const DgConverterBase* c2to1 = &(icosaProj->inverse());//投影空间逆转换为经纬度
 
    // done with icosaProj; the fwd/inv converters are in the RFNetwork
    delete icosaProj;

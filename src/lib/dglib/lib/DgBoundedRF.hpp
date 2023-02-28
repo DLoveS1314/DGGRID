@@ -41,7 +41,7 @@ DgBoundedRF<A, B, DB>::validLocation (const DgLocation& loc, bool /* convert */)
 
 } // bool DgBoundedRF<A, B, DB>::validLocation
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////在对应的类实现中 先把列加1 因为是行优先 然后行加1 载然后 qnum加1 如DgBoundedIDGG::incrementAddress //////////////////////////////////////////////////
 template<class A, class B, class DB> DgLocation&
 DgBoundedRF<A, B, DB>::incrementLocation (DgLocation& loc, bool /* convert */) const
 {

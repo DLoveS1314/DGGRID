@@ -44,9 +44,9 @@ DgIDGGS4D::DgIDGGS4D (DgRFNetwork& network, const DgGeoSphRF& backFrame,
 {
    const int aperture = 4;
 
-   setUndefLoc(makeLocation(undefAddress()));
+   setUndefLoc(makeLocation(undefAddress()));//定义一个假地址
    isAligned_ = true;
-   isCongruent_ = true;
+   isCongruent_ = true;//只有DGGS才有的性质
 
    // create the DGGs
 

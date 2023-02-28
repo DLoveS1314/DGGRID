@@ -69,7 +69,7 @@ const DgIDGGS4D&
 DgDmdIDGG::dmdDggs (void) const
 { return *(static_cast<const DgIDGGS4D*>(dggs())); }
 
-////////////////////////////////////////////////////////////////////////////////
+////////////////////////////连着DGIDGGBase里的参数一起初始化////////////////////////////////////////////////////
 void
 DgDmdIDGG::initialize (void)
 {
@@ -136,7 +136,7 @@ DgDmdIDGG::initialize (void)
       gridStats_.setNCells(10);
    else
       gridStats_.setNCells(parentNCells * 4);
-
+    //创建内部的转换器
    createConverters();
 
    ///// calculate the statistics /////

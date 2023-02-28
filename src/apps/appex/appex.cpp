@@ -54,7 +54,7 @@ int main (int, char**)
 
    // all DGGS's must be created using a factory makeRF method
    // the DGGS is memory managed by the DgRFNetwork
-   const DgIDGGS4D * idggsDPtr = DgIDGGS4D::makeRF(net0, geoRF, vert0, azimuth, 10,"ISEA4D_D8","ISEA",dgg::topo::D8);
+   const DgIDGGS4D * idggsDPtr = DgIDGGS4D::makeRF(net0, geoRF, vert0, azimuth, 10,"ISEA4D_D8","ISEA",dgg::topo::D4);
 //    const DgIDGGS4H* idggsPtr = DgIDGGS4H::makeRF(net0, geoRF, vert0, azimuth, 10);
 //   const DgIDGGS4H& idggs = *idggsPtr;
     const DgIDGGS4D& idggs = *idggsDPtr;

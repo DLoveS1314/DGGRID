@@ -1206,7 +1206,7 @@ void genGrid (GridGenParam& dp)
       dp.chdOut = new DgOutChildrenFile(childrenOutFileName, "chd");
 
    ////// do applicable clipping mode /////
-   //局部格网生成 提供seqnum 生成格网
+   // 提供seqnum 生成格网
    if (dp.seqToPoly) {
       dp.nCellsAccepted = 0;
       dp.nCellsTested = 0;
@@ -1312,15 +1312,15 @@ void genGrid (GridGenParam& dp)
          bool more = true;
 
          // skip cells up to the first desired output file; this needs to be done
-         // with seqNum to address converters
+         // with seqNum to address converters 这一步是跳过用的 设定1其实的编码输出位置
          while (dp.nCellsTested < startCell)
          {
             //dp.nCellsAccepted++;
             dp.nCellsTested++;
             outputStatus(dp);
 
-            dgg.bndRF().incrementLocation(*addLoc);
-            if (!dgg.bndRF().validLocation(*addLoc))
+            dgg.bndRF().incrementLocation(*addLoc);//依次添加1列
+            if (!dgg.bndRF().validLocation(*addLoc))//为何会有不符合条件的编码？断点也进不去 猜测 seqnum从0开始的话 会进入断点
             {
                more = false;
                break;
@@ -1339,7 +1339,7 @@ void genGrid (GridGenParam& dp)
                dgg.setVertices(*addLoc, *verts, dp.nDensify);
 
                outputCellAdd2D(dp, *dggs, dgg, *addLoc, *verts, deg);
-	       delete verts;
+               delete verts;
 
                dgg.bndRF().incrementLocation(*addLoc);
                if (!dgg.bndRF().validLocation(*addLoc)) break;
@@ -1356,7 +1356,8 @@ void genGrid (GridGenParam& dp)
             baseTile.depthFirstTraversal(dp, *dggs, dgg, deg, 2);
          }
       }
-   } else { // use clip regions
+   }
+   else { // use clip regions 局部格网生成
 
 // USE_GDAL is set in MakeIncludes
 #ifdef USE_GDAL
