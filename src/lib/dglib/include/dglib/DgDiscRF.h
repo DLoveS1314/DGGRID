@@ -216,7 +216,8 @@ class DgDiscRF : public DgRF<A, long long int> {
       virtual A quantify    (const B& point) const = 0;
 //过度坐标系转换时 是将行列号转为坐标纸 中心点坐标 成为反量化 一般反量化的参考系是backfarme
       virtual B invQuantify (const A& add)   const = 0;
-
+//所有子类都要实现的纯虚函数 一个是设置一阶临近 一个事得到顶点坐标 这两个函数被分装在了setNeighbors setVertices里
+//形成了多态，对于IDGG系列空间，主要在IDGGbas中实现
       virtual void setAddNeighbors (const A& add, DgLocVector& vec) const = 0;
       virtual void setAddVertices  (const A& add, DgPolygon& vec) const = 0;
 

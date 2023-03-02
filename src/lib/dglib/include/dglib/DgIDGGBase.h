@@ -95,7 +95,6 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
       unsigned int          precision (void) const { return precision_; } 
 
       const DgGridStats& gridStats (void) const { return gridStats_; }
-
       void setPrecision (unsigned int precisionIn)
         { precision_ = precisionIn;
           gridStats_.setPrecision(precision()); }
@@ -153,6 +152,9 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
       static const DgQuadEdgeCells& edgeTable (int quadNum)
                        { return edgeTable_[quadNum]; }
 
+//  自建函数 生成菱形四邻域和八邻域
+    vector<DgQ2DICoord> fourneicell(DgQ2DICoord& add1 );
+    vector<DgQ2DICoord> neicell(const DgQ2DICoord& add1 ) const;
    protected:
 
       DgIDGGBase (const DgIDGGSBase* dggs, const DgGeoSphRF& geoRFIn, 
