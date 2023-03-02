@@ -163,9 +163,9 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
       DgIDGGBase (const DgIDGGBase& grd);
 
       virtual void createConverters (void);
-
+// 保护类 无法在外部调用 只是为了生成grid2D_
       const DgDiscRFS2D& grid2DS (void) const { return *grid2DS_; }
-
+//存储所在的离散格网空间 这个是负责多层之间的属性 现在所在是负责单层格网的生成 只是一个指针 不影响内存
       const DgIDGGSBase* dggs_;
 
       DgSphIcosa* sphIcosa_;
@@ -196,11 +196,11 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
         //建立自己的局部路由
       DgRFNetwork locNet_;
 
-      const DgDiscRF2D* grid2D_;
-      const DgDiscRFS2D* grid2DS_;
-      const DgContCartRF* ccFrame_;
+      const DgDiscRF2D* grid2D_; //赋值语句  grid2DS().grids()[res()] 有子类负责调用 createConverters（）函数
+      const DgDiscRFS2D* grid2DS_;//这个是为了创建grid2D_ 需要循环建立到res层 才能得到grid2D_
+      const DgContCartRF* ccFrame_;//子类建立局部网络的时候 DgDmdIDGG::initialize 用这个作为backfarme 参数是平面x y的  DgContCartRF这个类里也没有什么内容 就是求一下距离
 
-      // intermediate RFs
+      // intermediate RFs 局部的坐标空间
 
       const DgProjTriRF* projTriRF_;
       const DgVertex2DDRF* vertexRF_;

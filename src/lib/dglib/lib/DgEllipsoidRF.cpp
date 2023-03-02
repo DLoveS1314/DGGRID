@@ -29,11 +29,12 @@
 const DgGeoCoord DgGeoCoord::undefGeoCoord(LDBL_MAX, LDBL_MAX);
 const long double DgGeoCoord::tolerance = 0.0000000005L;
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////返回大圆距离///////////////////////////////////////////////
 long double
 DgGeoCoord::gcDist (const DgGeoCoord& g1, const DgGeoCoord& g2,
                     bool rads)
 /*
+ * 与spheredist所求相同
    return great circle distance in radians between g1 and g2.
 
    CRC Math, 1991, pp. 129-130.
@@ -147,7 +148,7 @@ DgGeoCoord::geoTriArea (const DgGeoCoord& g1, const DgGeoCoord& g2,
 
 } // long double DgGeoCoord::geoTriArea
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////返回球面多边形面积 必须是简单多边形/////////////////////////////////////////////////////////
 long double
 DgGeoCoord::geoPolyArea (const DgPolygon& poly, const DgGeoCoord center)
 //
@@ -535,7 +536,7 @@ GeoCoord xyzll(const Vec3D& v0)
 
  } /* GeoCoord xyzll */
 
-/******************************************************************************/
+/*****************************返回三角形中心点 转到xyz坐标系下算的*************************************************/
 GeoCoord sphTricenpoint(GeoCoord sp[3])
 /*
    Calculate and return the center point of a sphere triangle
@@ -750,6 +751,7 @@ GeoCoord GCintersect(const GeoCoord& sv11, const GeoCoord& sv12,
 long double GCptlat(long double lon, const GeoCoord& sv1, const GeoCoord& sv2)
 /*
   return latitude of the point on great circle segment with known longtitude
+  返回经度已知的大圆段上点的纬度
 */
  {
   long double lat,a,b,c;

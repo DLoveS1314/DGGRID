@@ -43,7 +43,7 @@ class DgBoundedIDGG : public DgBoundedRF<DgQ2DICoord, DgGeoCoord, long double> {
 
       DgBoundedIDGG (const DgIDGGBase& IDGGin);
      ~DgBoundedIDGG (void) { delete bnd2D_; }
-
+//    先把列加1 因为是行优先 然后行加1 载然后 qnum加1
       virtual DgQ2DICoord& incrementAddress (DgQ2DICoord& add) const;
       virtual DgQ2DICoord& decrementAddress (DgQ2DICoord& add) const;
 
@@ -55,9 +55,9 @@ class DgBoundedIDGG : public DgBoundedRF<DgQ2DICoord, DgGeoCoord, long double> {
       const DgIDGGBase& idgg (void) const { return IDGG_; }
 
       unsigned long long int offsetPerQuad (void) const { return offsetPerQuad_; }
-
+//        行列号转seqnum
       virtual unsigned long long int seqNumAddress (const DgQ2DICoord& add) const;
-
+//        seqnum转行列号
       virtual DgQ2DICoord addFromSeqNum (unsigned long long int sNum) const;
 
       virtual DgQ2DICoord q2dixToQ2di (const DgQ2DICoord& add) const;

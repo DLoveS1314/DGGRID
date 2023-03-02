@@ -270,12 +270,12 @@ class DgVertTriVals {
 
    private:
 
-      int quadNum_;
+     int quadNum_;
       int triNum_;
       int subTri_;
       bool keep_;
       DgDVec2D trans_;
-      int rot60_; // number of deosil 60 deg rotations after translation
+      int rot60_;  // number of deosil 60 deg rotations after translation
 
 };
 
@@ -284,7 +284,7 @@ inline ostream&
 operator<< (ostream& str, const DgVertTriVals& coord)
 { return str << string(coord); }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////顶点坐标系 主要为了计算单元边界点落在那个面上//////////////////////////////////////////////////
 class DgVertex2DDCoord {
 
    public:
@@ -330,7 +330,7 @@ inline ostream&
 operator<< (ostream& str, const DgVertex2DDCoord& coord)
 { return str << string(coord); }
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////顶点坐标系对应的顶点空间///////////////////////////////////////
 class DgVertex2DDRF : public DgRF<DgVertex2DDCoord, long double> {
 
    public:
@@ -500,7 +500,7 @@ class DgQ2DDtoVertex2DDConverter :
         inline int compute_subtriangle(const long double& x, const long double&  y) const;
 };
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////投影坐标转顶点坐标//////////////////////////////////////////
 class DgProjTriToVertex2DD :
         public DgConverter<DgProjTriCoord, long double, DgVertex2DDCoord, long double> {
 
@@ -577,6 +577,7 @@ class DgPlaneTriProj : public DgConverter<DgProjTriCoord, long double,
 //
 //   Coordinate consisting of a string containing quad number, (aperture 3 hex
 //        level indicator), and radix string
+////由包含四位数的字符串（孔径3十六进制//液位指示器）和基数字符串组成的坐标 在哪里赋值
 //
 class DgInterleaveCoord  {
 

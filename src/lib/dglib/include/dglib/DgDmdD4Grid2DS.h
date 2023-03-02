@@ -59,7 +59,7 @@ class DgDmdD4Grid2DS : public DgDiscRFS2D {
                  const string& nameIn = "4D4");
 
       DgDmdD4Grid2DS (const DgDmdD4Grid2DS& rf);
-
+//        孔径的开根号
       int radix_;
 
       // pure virtual functions from DgDiscRFS

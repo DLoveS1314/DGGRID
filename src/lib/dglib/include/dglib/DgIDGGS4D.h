@@ -61,8 +61,8 @@ class DgIDGGS4D : public DgIDGGS {
 
       DgIDGGS4D (const DgIDGGS4D& rf);
 
-      // pure virtual functions from DgDiscRFS
-
+      // pure virtual functions from DgDiscRFS 需要实现的纯虚函数
+        //获得父格网编码?
       virtual void setAddParents (const DgResAdd<DgQ2DICoord>& add,
                                   DgLocVector& vec) const;
 

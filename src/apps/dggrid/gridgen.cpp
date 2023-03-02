@@ -1312,7 +1312,7 @@ void genGrid (GridGenParam& dp)
          bool more = true;
 
          // skip cells up to the first desired output file; this needs to be done
-         // with seqNum to address converters 这一步是跳过用的 设定1其实的编码输出位置
+         // with seqNum to address converters 这一步是跳过用的 设定起始的编码输出位置
          while (dp.nCellsTested < startCell)
          {
             //dp.nCellsAccepted++;
@@ -1340,7 +1340,7 @@ void genGrid (GridGenParam& dp)
 
                outputCellAdd2D(dp, *dggs, dgg, *addLoc, *verts, deg);
                delete verts;
-
+                //按照 qnum 行 列 逐次增加
                dgg.bndRF().incrementLocation(*addLoc);
                if (!dgg.bndRF().validLocation(*addLoc)) break;
             }

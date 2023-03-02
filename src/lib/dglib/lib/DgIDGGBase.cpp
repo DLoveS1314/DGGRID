@@ -141,17 +141,20 @@ DgIDGGBase::~DgIDGGBase()
 void
 DgIDGGBase::createConverters (void)
 {
+
+//   grid2DS()在子类中进行赋值 grid2DS().grids()[res()] 这个得到是一个 vector<const DgDiscRF<A, B, DB>*>结构 强制转化为子类 这个是一个空数组
+//grid2DS 有很多层级 只取一级即可表示当前的grid2D_
    grid2D_ = dynamic_cast<const DgDiscRF2D*>(grid2DS().grids()[res()]);
    //cout << "== GRID2D: " << string(*grid2D_);
-
+//    bndRF_ 赋值位置
    bndRF_ = new DgBoundedIDGG(*this);
    //cout << "== BNDRF:: " << string(*bndRF_) << endl;
 
-   // create the intermediate RFs 是全局转换器
+   // create the intermediate RFs 是全局的参考系统
 
    projTriRF_ = DgProjTriRF::makeRF(network(), name() + string("projTri"),
-                sphIcosa_);
-   vertexRF_ = DgVertex2DDRF::makeRF(network(), name() + string("vertex"));
+                sphIcosa_);//投影空间
+   vertexRF_ = DgVertex2DDRF::makeRF(network(), name() + string("vertex"));//顶点空间
    q2ddRF_ = DgQ2DDRF::makeRF(network(), name() + string("q2dd"));
    intRF_ = DgInterleaveRF::makeRF(network(), name() + string("int"));
    planeRF_ = DgPlaneTriRF::makeRF(network(), name() + string("plane"));
@@ -346,7 +349,7 @@ DgIDGGBase::createConverters (void)
 
 } // DgIDGGBase::createConverters
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////获取边界点//////////////////////////////////////////////////////
 void
 DgIDGGBase::setVertices (const DgLocation& loc, DgPolygon& vec,
                      int densify) const
@@ -368,11 +371,12 @@ void
 DgIDGGBase::setAddVertices (const DgQ2DICoord& add, DgPolygon& vec,
                         int densify) const
 {
+    //转到不带面编码的行列号模式，并且参考系转成grid2D对应的参考系
    DgLocation* tmpLoc = grid2D().makeLocation(add.coord());
 //cout << "a: " << *tmpLoc << endl;
     DgPolygon dummy(ccFrame());
     vec = dummy;  // force empty RF to allow for network change
-    grid2D().setVertices(*tmpLoc, vec);
+    grid2D().setVertices(*tmpLoc, vec);//得到过度坐标系下坐标
    delete tmpLoc;
 
 //cout << "A: " << vec << endl;

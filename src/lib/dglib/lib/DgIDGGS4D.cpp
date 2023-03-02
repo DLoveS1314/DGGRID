@@ -46,7 +46,7 @@ DgIDGGS4D::DgIDGGS4D (DgRFNetwork& network, const DgGeoSphRF& backFrame,
 
    setUndefLoc(makeLocation(undefAddress()));//定义一个假地址
    isAligned_ = true;
-   isCongruent_ = true;//只有DGGS才有的性质
+   isCongruent_ = true;//只有DGGS才有的性质,是否嵌套
 
    // create the DGGs
 
@@ -99,7 +99,6 @@ DgIDGGS4D::setAddParents (const DgResAdd<DgQ2DICoord>& add,
       DgLocation* tmpLoc = makeLocation(add);
       grids()[add.res() - 1]->convert(tmpLoc);
       convert(tmpLoc);
-
       vec.push_back(*tmpLoc);
 
       delete tmpLoc;

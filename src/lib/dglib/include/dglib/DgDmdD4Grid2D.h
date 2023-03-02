@@ -75,7 +75,7 @@ class DgDmdD4Grid2D : public DgDiscRF2D {
       static const long double xOff_;
       static const long double xOffComp_;
       static const long double skewFac_;
-
+//量化 坐标转行列
       virtual DgIVec2D quantify (const DgDVec2D& point) const
          {
             DgDVec2D tmp(point);
@@ -86,7 +86,7 @@ class DgDmdD4Grid2D : public DgDiscRF2D {
 
          } // DgIVec2D DgDmdD4Grid2D::quantify
 
-
+//反量化 行列转坐标（中心店坐标） 计算的都是过度坐标系坐标
       virtual DgDVec2D invQuantify (const DgIVec2D& add) const
          {
             DgDVec2D tmp(add.i(), add.j() * yOff2_);

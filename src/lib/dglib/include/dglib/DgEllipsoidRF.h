@@ -51,7 +51,7 @@ class DgGeoCoord : public DgDVec2D {
       static const DgGeoCoord undefGeoCoord;
 
       static const long double tolerance; // decimal degrees
-
+        //         返回大圆距离
       static long double gcDist (const DgGeoCoord& g1, const DgGeoCoord& g2,
                             bool rads = true);
 
@@ -61,7 +61,7 @@ class DgGeoCoord : public DgDVec2D {
 
       static long double geoTriArea (const DgGeoCoord& g1, const DgGeoCoord& g2,
                                 const DgGeoCoord& g3);
-
+//返回球面多边形面积 必须是简单多边形
       static long double geoPolyArea (const DgPolygon& poly,
                                  const DgGeoCoord center);
 
@@ -443,21 +443,32 @@ typedef struct PreCompInTri {
 
 typedef struct SphIcosa {
 
-   /* sufficient icosa placement data */
-
-   GeoCoord pt;
-   long double azimuth;
-
+   /* sufficient icosa placement data 存储了定位、顶点和面信息 pt就是赋值的起始点经纬度
+    * DgSphIcosa 负责存储这个结构体
+    * */
+    /** 正二十面体定位参数：某一顶点的位置 */
+    GeoCoord pt;
+    /** 正二十面体定位参数：某一顶点的方位角 事实上定位一个正二十面体只要知道pt和azimuth就可以*/
+    long double azimuth;
+    /* 预先计算的投影值 */
    /* pre-calculated projection values */
+    /** 正二十面体12个顶点的坐标 */
+   GeoCoord icoverts[12];//十二个顶点经纬度坐标
 
-   GeoCoord icoverts[12];
-   GeoCoord icotri[20][3];
-   PreCompGeo triCen[20];
-   PreCompInTri ptin[20];
-   long double dazh[20];
+    /** 二十个球面三角形各自的角点坐标 */
+    GeoCoord icotri[20][3];//二十个球面三角形顶点坐标
+
+    /** 球面三角形预先计算结构（内含lat,lon,sinLat,cosLat...） */
+    PreCompGeo triCen[20];//球面三角形中心点坐标用于snydr计算 和判断点在哪个三角形内
+
+    /** 判断点在三角形中所需参数 */
+    PreCompInTri ptin[20];//判断点是否落在球面三角形内
+
+    /** 中线的方位角（单位：弧度） */
+    long double dazh[20];
 
 } SphIcosa;
-
+//isea 点坐标
 typedef struct IcosaGridPt {
 
    Vec2D pt; /* the point itself in triangle coordinates */

@@ -232,7 +232,7 @@ DgBoundedIDGG::addFromSeqNum (unsigned long long int sNum) const
 } 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Take a point that may lie off it's quad and get it on the correct quad 处理跨邻域的格网问题
+/// Take a point that may lie off it's quad and get it on the correct quad 处理跨邻域的格网问题 这种方法和穷举法也没什么区别 不知道能否所有都适用
 DgQ2DICoord 
 DgBoundedIDGG::q2dixToQ2di (const DgQ2DICoord& add) const
 {

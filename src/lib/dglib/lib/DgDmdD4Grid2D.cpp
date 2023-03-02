@@ -31,7 +31,7 @@ const long double DgDmdD4Grid2D::xOff_ = 0.25L;
 const long double DgDmdD4Grid2D::xOffComp_ = 1.0L - xOff_;
 const long double DgDmdD4Grid2D::skewFac_ = M_SQRT3 / 3.0L;
 
-////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////添加边坐标////////////////////////////////////////////////
 void
 DgDmdD4Grid2D::setAddVertices (const DgIVec2D& add, DgPolygon& vec) const
 {
@@ -40,7 +40,8 @@ DgDmdD4Grid2D::setAddVertices (const DgIVec2D& add, DgPolygon& vec) const
    // find the center
 
    DgLocation tmpLoc;
-   setAddPoint(add, tmpLoc);
+   setAddPoint(add, tmpLoc);//得到中心点坐标
+//   tmpLoc是带参考系的location 得到坐标
    const DgDVec2D& cent = *(backFrame().getAddress(tmpLoc));
 
    v.push_back(new DgAddress<DgDVec2D>(cent + DgDVec2D(-xOff_,     -yOff_)));

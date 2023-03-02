@@ -25,7 +25,7 @@
 #include <dglib/DgProjTriRF.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////每次创建一层格网的时候都需要创建一个新的球面参数///////////////////////////////////////////////////
 DgSphIcosa::DgSphIcosa (const DgGeoCoord& vert0, long double azimuthDegs)
 {
    sphIcosa_.pt.lon = vert0.lon();
@@ -75,12 +75,14 @@ ostream& operator<< (ostream& str, const DgSphIcosa& dgsi)
 ////////////////////////////////////////////////////////////////////////////////
 GeoCoord coordtrans(const GeoCoord& newNPold, const GeoCoord& ptold,
                     long double lon0)
-/* return the new coordinates of any point in orginal coordinate system.
+/*   
+返回以newNPold为极点的经纬度坐标return使用方位投影公式 第3章- 第3讲方位投影及其应用 最后怎么返回真正的经纬度你
+the new coordinates of any point in orginal coordinate system.
    Define a point (newNPold) in orginal coordinate system as the North
    Pole in new coordinate system, and the great circle connect the original
    and new North Pole as the lon0 longitude in new coordinate system, given
    any point in orginal coordinate system, this function return the new
-   coordinates. */
+   coordinates.*/
 
  {
   long double cosptnewlat, cosptnewlon;
@@ -121,6 +123,7 @@ DgSphIcosa::whichIcosaTri (const GeoCoord& pt)
 {
    // start by assuming the first face is the minimum
    int minFace = 0;
+   // 计算与三角形中心点大圆弧长 来比较离得最近的面是哪个
    long double minDist = DgGeoCoord::gcDist(sphIcosa().triCen[0].pt, pt);
 
    // compare against the rest of the faces
@@ -142,12 +145,13 @@ DgSphIcosa::whichIcosaTri (const GeoCoord& pt)
 void
 DgSphIcosa::ico12verts (void)
 /*
-   Fill in the icosahedron particulars given one point and one edge's azimuth.
+   //初始化正二十面体的参数 Fill in the icosahedron particulars given one point and one edge's azimuth.
 */
 {
    GeoCoord newnpold, vertsnew[12];
    int i, j;
    Vec3D ptri[3];
+  /* 构成三角形的顶点索引（符合右手法则，首个一定是上或下顶点） */
 
    static int verts[20][3] = {
 
@@ -172,13 +176,19 @@ DgSphIcosa::ico12verts (void)
            { 11, 10,  9 },   /* 18 */
            { 11,  6, 10 }    /* 19 */
    };
-
+  /* 标准二十面体顶点的坐标初始化 */ 
+  //使用方位投影公式 第3章- 第3讲方位投影及其应用 意思是计算新极点出的经纬度
+  // 新坐标系北极点的纬度
    newnpold.lat = sphIcosa().pt.lat;
-   newnpold.lon = 0.0;
+     // 新坐标系北极点的经度是任意角度, 指定为0.
+   newnpold.lon = 0.0; //极点处的角度是任意的
    for (i = 1; i <= 5; i++)
-   {
+   {//先计算以真正的南北两级为顶点的坐标经纬度
+          //纬度为26.565051177的5个点
      vertsnew[i].lat = 26.565051177 * M_PI / 180.0;
+         //考虑到方位角的影响
      vertsnew[i].lon = -sphIcosa().azimuth + 72 * (i - 1) * M_PI / 180.0;
+//     转换为【-pi pi 】区间
      if (vertsnew[i].lon > M_PI-PRECISION) vertsnew[i].lon -= 2 * M_PI;
      if (vertsnew[i].lon < -(M_PI+PRECISION)) vertsnew[i].lon += 2 * M_PI;
      vertsnew[i+5].lat = -26.565051177 * M_PI / 180;
@@ -192,28 +202,35 @@ DgSphIcosa::ico12verts (void)
    }
    vertsnew[11].lat = -90.0 * M_PI / 180.0;
    vertsnew[11].lon = 0.0 * M_PI / 180.0;
-   sphIcosa().icoverts[0].lat = sphIcosa().pt.lat;
-   sphIcosa().icoverts[0].lon = sphIcosa().pt.lon;
+
+     //0#点是用户直接给定的点,不参与坐标变换.（此处涉及到关于正二十面体的定义的位置在问题中应该很重要 杜灵瑀 2016.08.04） 
+       sphIcosa().icoverts[0].lat = sphIcosa().pt.lat;
+       sphIcosa().icoverts[0].lon = sphIcosa().pt.lon;
 /***** hardwire for bug test ******/
 
-/*
+
 vertsnew[0].lat = 90.0 * M_PI / 180.0;
 vertsnew[0].lon = 0.0 * M_PI / 180.0;
-for (i = 0; i < 12; i++)
-{
-   sphIcosa().icoverts[i].lat = vertsnew[i].lat;
-   sphIcosa().icoverts[i].lon = vertsnew[i].lon;
-}
-*/
+//for (i = 0; i < 12; i++)
+//{
+////   sphIcosa().icoverts[i].lat =  vertsnew[i];
+////   sphIcosa().icoverts[i].lon = vertsnew[i].lon;
+//    dgcout << "(" << i<<" "<< vertsnew[i].lon * M_180_PI << ", " <<  vertsnew[i].lat * M_180_PI << ")"<<"\n";
+//}
 
-/**********************************/
-   for (i = 1; i < 12; i++)
+  /* 根据用户的定义对二十面体的顶点进行坐标变换 */
+
+/***************这个结果输出的是基于新极点的经纬度，并不是真正的经纬度，暂且不知道真正经纬度在哪转换的(输出的事真正的经纬度 但是按照第3章- 第3讲方位投影及其应用公式应该是
+ 关于新极点的新经纬度呀 而且coordtrans的解释也是这样说的 就是新极点下的经纬度 但是输出的值是在老坐标系下度经纬度值* )*******************/
+   for (i = 0; i < 12; i++)
    {
       sphIcosa().icoverts[i] =
                    coordtrans(newnpold, vertsnew[i], sphIcosa().pt.lon);
-   }
+//       dgcout << "(nnn" << i<<" "<<sphIcosa().icoverts[i].lon * M_180_PI << ", " << sphIcosa().icoverts[i].lat * M_180_PI << ")"<<"\n";
 
+   }
    /* calculate the triangle-specific values */
+  /* 计算以描述三角形的各项值 */
 
    for (i = 0; i < 20; i++)
    {
@@ -223,6 +240,7 @@ for (i = 0; i < 12; i++)
       {
          sphIcosa().icotri[i][j] = sphIcosa().icoverts[verts[i][j]];
       }
+    /* 预先计算与判断点在中心相关的数值 */
 
       /* pre-calculate the center point values */
 
@@ -233,13 +251,19 @@ for (i = 0; i < 12; i++)
       sphIcosa().triCen[i].cosLon = cosl(sphIcosa().triCen[i].pt.lon);
 
       /* pre-calculate the dazh's */
-
+    /*
+     * 预先计算球面三角形中心到上（下）顶点连线与经线（地理北）的夹角，详见文献[1]公式（14）。
+     * 多面体与地球的位置关系可以任意定义，而Snyder投影的计算必须化归到基本单元中，因此必须
+     * 记录这个方位角。
+     */
       const GeoCoord* t = sphIcosa().icotri[i];
       const PreCompGeo& c = sphIcosa().triCen[i];
       sphIcosa().dazh[i] = atan2l(cosl(t[0].lat) * sinl(t[0].lon - c.pt.lon),
                   c.cosLat * sinl(t[0].lat) - c.sinLat * cosl(t[0].lat) *
                   cosl(t[0].lon - c.pt.lon));
-
+      // 避免计算误差（贲进添加）
+      if (fabs(sphIcosa().dazh[i]) < PRECISION)
+         sphIcosa().dazh[i] = 0.0;
 /*
       sphIcosa().dazh[i] = atan2l(cosl(sphIcosa().icotri[i][0].lat) *
                   sinl(sphIcosa().icotri[i][0].lon - sphIcosa().triCen[i].pt.lon),
@@ -249,6 +273,7 @@ for (i = 0; i < 12; i++)
 */
 
       /* pre-calculate the pt-in-triangle constants */
+    /* 预先计算判断点在三角形中所需参数 */
 
       for (j = 0; j < 3; j++) ptri[j] = llxyz(sphIcosa().icotri[i][j]);
 

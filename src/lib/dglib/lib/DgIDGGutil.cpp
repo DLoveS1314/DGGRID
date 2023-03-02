@@ -51,8 +51,9 @@ const DgQ2DDCoord DgQ2DDCoord::undefDgQ2DDCoord(-1,
 ////////////////////////////////////////////////////////////////////////////////
 DgVertTriVals DgVertex2DDRF::vertTable_[12][6] = {  
 
-   {  // vert 0
-
+   {  // vert 0    
+      //                int quadNum_     int triNum_  int subTri_    bool keep_  DgDVec2D trans_ int rot60_; 
+      //意思分别是 0号顶点 对应的四边形索引  对应的三边形索引  三角形方向活索引 三角形是否有效  平移两
       DgVertTriVals(  2,  1, 0, true,  DgDVec2D(-M_HALF, -M_SIN60),  3 ), 
       DgVertTriVals(  1,  0, 1, true,  DgDVec2D(-M_ONE,   M_ZERO ),  2 ), 
       DgVertTriVals(  5,  4, 2, true,  DgDVec2D(-M_HALF,  M_SIN60),  1 ), 
@@ -727,7 +728,7 @@ DgQ2DDtoVertex2DDConverter::convertTypedAddress (const DgQ2DDCoord& addIn) const
 
 } // DgVertex2DDCoord DgQ2DDtoVertex2DDConverter::convertTypedAddress 
 
-////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////投影坐标转顶点坐标////////////////////////////////////////////////
 DgVertex2DDCoord 
 DgProjTriToVertex2DD::convertTypedAddress (const DgProjTriCoord& addIn) const
 {

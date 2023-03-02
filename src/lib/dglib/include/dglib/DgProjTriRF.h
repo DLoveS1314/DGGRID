@@ -69,7 +69,7 @@ ostream& operator<< (ostream& str, const DgSphIcosa& dgsi);
 GeoCoord coordtrans(const GeoCoord& newNPold,
                     const GeoCoord& ptold, long double lon0);
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////投影空间坐标 尚未转成地址///////////////////////////////////////////////
 class DgProjTriCoord {
 
    public:

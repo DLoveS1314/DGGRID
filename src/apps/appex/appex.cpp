@@ -47,8 +47,8 @@ int main (int, char**)
 
    // create the ISEA4H grid system with resolutions 0-9; requires a
    // fixed icosahedron vertex and edge azimuth
-   // DgGeoCoord vert0(11.25L, 58.28252559L, false); // args: lon, lat, isRadians
-   DgGeoCoord vert0(0.0L, 90.0L, false); // args: lon, lat, isRadians
+    DgGeoCoord vert0(11.25L, 58.28252559L, false); // args: lon, lat, isRadians
+//   DgGeoCoord vert0(0.0L, 90.0L, false); // args: lon, lat, isRadians
 
    long double azimuth = 0.0L;
 
@@ -62,6 +62,10 @@ int main (int, char**)
    // get the resolution 7 dgg from the dggs
    const DgIDGG& dgg = idggs.idgg(3);
    cout << dgg.gridStats() << endl;
+
+  DgQuadEdgeCells edge = dgg.edgeTable(1);
+    cout << edge.isType0()<<edge.loneVert()<<edge.quadNum()<<edge.rightQuad()<<edge.upQuad();
+//    cout<< dgg.grid2DS().grids()[res()];
 
    //////// now use the DGG /////////
 
@@ -79,7 +83,7 @@ int main (int, char**)
     cout << "the loc2 " << *loc2 << endl;
 
    // converting the point location to the dgg RF determines which cell it's in
-   dgg.convert(thePt);
+//   dgg.convert(thePt);
 //   cout << "* lies in cell " << *thePt << endl;
 
    // we can get the cell's vertices, which are defined in geoRF

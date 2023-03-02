@@ -63,7 +63,7 @@ class DgConverterBase {
       DgConverterBase (const DgConverterBase& con) { operator=(con); }
 
       DgConverterBase& operator= (const DgConverterBase& con);
-
+        //纯虚函数 每个转换器必须实现 输出结果不改变addIn的值
       virtual DgAddressBase* createConvertedAddress
                               (const DgAddressBase& addIn) const = 0;
 

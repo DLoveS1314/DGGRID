@@ -115,7 +115,7 @@ class DgContAffineConverter :
       long double rotDeg   (void) const { return rotDeg_; }
 
       const DgDVec2D& translate (void) const { return translate_; }
-
+//convert类需要实现的纯虚函数 仿射变化参数，过度空间和归算空间都用这个
       virtual DgDVec2D convertTypedAddress (const DgDVec2D& addIn) const
                 {
                    DgDVec2D newAdd(addIn);

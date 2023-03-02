@@ -27,7 +27,8 @@
 template<class A, class B, class DB> void
 DgDiscRF<A, B, DB>::setVertices (const DgLocation& loc, DgPolygon& vec) const
 {
-   vec.clearAddress(); 
+   vec.clearAddress();
+   //这步主要转换DgPolygon为bf的参考系相同
    backFrame().convert(vec);
    
    if (loc.rf() == *this)
@@ -124,6 +125,7 @@ DgDiscRF<A, B, DB>::setPoint (const DgLocation& loc, const DgRFBase& rf,
 template<class A, class B, class DB> void
 DgDiscRF<A, B, DB>::setAddPoint (const A& add, DgLocation& pt) const
 {
+//    invQuantify 反序列化 把行列转为中心店坐标  makeLocation添加上参考系
    DgLocation* tmpLoc = backFrame().makeLocation(invQuantify(add));
 
    pt = *tmpLoc;

@@ -210,9 +210,11 @@ class DgDiscRF : public DgRF<A, long long int> {
 
       virtual const A& undefAddress (void) const = 0;
 
-      // new pure virtual functions
+      // new pure virtual functions 所有相关类必须继承
 
+//过度坐标系转换时 是将坐标值转为行列号 称为量化
       virtual A quantify    (const B& point) const = 0;
+//过度坐标系转换时 是将行列号转为坐标纸 中心点坐标 成为反量化 一般反量化的参考系是backfarme
       virtual B invQuantify (const A& add)   const = 0;
 
       virtual void setAddNeighbors (const A& add, DgLocVector& vec) const = 0;

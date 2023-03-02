@@ -76,7 +76,7 @@ class DgIDGGS : public DgIDGGSBase {
                bool isSuperfund = false, bool isApSeq = false,
                const DgApSeq& apSeq = DgApSeq::defaultApSeq);
 
-      // remind sub-classes of the pure virtual functions remaining from above
+      // remind sub-classes of the pure virtual functions remaining from above 继承子父类
 
       virtual void setAddParents (const DgResAdd<DgQ2DICoord>& add,
                                   DgLocVector& vec) const = 0;

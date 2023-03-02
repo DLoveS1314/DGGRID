@@ -42,7 +42,7 @@ DgRFBase::~DgRFBase (void)
 
 } // DgRFBase::~DgRFBase
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////坐标空间转换函数 转换位置//////////////////////////////////////////////////
 DgLocation* 
 DgRFBase::convert (DgLocation* loc) const
 {
@@ -80,15 +80,16 @@ DgRFBase::convert (DgLocation* loc) const
 
 } // DgLocation* DgRFBase::convert
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////坐标空间转换函数 转换多边形 ///////////////////////////////////////////////////////
 DgPolygon& 
 DgRFBase::convert (DgPolygon& poly) const
 {
+    //如果没有坐标空间 就是赋值当前的坐标空间
    if (poly.rf_ == 0) {
       poly.rf_ = this;
       return poly;
    }
-   
+   //如果不在同一个网络下 则不应该进行转换
    if (network() != poly.rf().network()) {
       report("DgRFBase::convert() from/to network mismatch",
              DgBase::Fatal);
@@ -102,14 +103,14 @@ DgRFBase::convert (DgPolygon& poly) const
       return poly;
    }
    
-   // if we're here we need to convert
-
+   // if we're here we need to convert 开始真正的转换
+   //查看是否存在 转换器
    const DgConverterBase* conv = network().getConverter(poly.rf(), *this);
    if (!conv) {
       report("DgRFBase::convert() getConverter error", DgBase::Fatal);
       return poly;
    }
-
+//判断完成后真正开始转换
    convert((DgLocVector&) poly);
    if (poly.hasHoles()) {
       for (unsigned long i = 0; i < poly.holes().size(); i++)
@@ -120,7 +121,7 @@ DgRFBase::convert (DgPolygon& poly) const
 
 } // DgPolygon& DgRFBase::convert
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////坐标空间转换函数 转换顶点//////////////////////////////////////////////////
 DgLocVector& 
 DgRFBase::convert (DgLocVector& vec) const
 {

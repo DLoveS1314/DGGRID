@@ -37,7 +37,7 @@
 
 using namespace dgg::topo;
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////包含纯虚函数 这是一个纯虚类/////////////////////////////////////////////////
 class DgDiscRFS2D : public DgDiscRFS<DgIVec2D, DgDVec2D, long double> {
 
    public:
@@ -51,7 +51,7 @@ class DgDiscRFS2D : public DgDiscRFS<DgIVec2D, DgDVec2D, long double> {
                    const string& name = "DiscRFS2D",
                    bool isMixed43 = false, int numAp4 = 0, bool isSuperfund = false,
                    bool isApSeq = false, const DgApSeq& apSeq = DgApSeq::defaultApSeq);
-
+//没有事项相关变量的赋值
       DgDiscRFS2D (DgRFNetwork& network,
                    const DgRF<DgDVec2D, long double>& backFrame,
                    int nRes = 1, unsigned int aperture = 4,
@@ -72,7 +72,7 @@ class DgDiscRFS2D : public DgDiscRFS<DgIVec2D, DgDVec2D, long double> {
              return undef; }
 
    protected:
-
+//没有参数 没有返回值 只有一个局部变量 这个函数干什么用
       void createSubConverters (void) const;
 
       // remind users of the pure virtual functions remaining from above

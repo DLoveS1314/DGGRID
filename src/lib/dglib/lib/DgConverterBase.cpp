@@ -134,7 +134,7 @@ DgConverterBase::forceConnectTo (bool /* verify */) const
 
 } // void DgConverterBase::forceConnectTo
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////转换器基类 转换位置//////////////////////////////////////////////////
 DgLocation* 
 DgConverterBase::convert (DgLocation* loc) const
 {
@@ -155,7 +155,7 @@ DgConverterBase::convert (DgLocation* loc) const
 
    DgAddressBase* tmpAdd = createConvertedAddress(*loc->address());
    delete loc->address_;
-   loc->address_ = tmpAdd;
+   loc->address_ = tmpAdd;//最终改变了loc的坐标
 
    if (isTraceOn()) traceStream() << "->" << *loc << endl;
   

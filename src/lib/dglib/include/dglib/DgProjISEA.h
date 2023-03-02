@@ -54,7 +54,7 @@ class DgProjISEAFwd : public DgConverter<DgGeoCoord, long double,
                        const DgRF<DgProjTriCoord, long double>& projTriRF);
 
       const DgProjTriRF& projTriRF (void) const { return *pProjTriRF_; }
-
+//    实现基类的虚函数完成地址转换/
       virtual DgProjTriCoord convertTypedAddress (const DgGeoCoord& addIn)
                                                                const;
 
@@ -96,7 +96,7 @@ class DgProjISEA : public DgIcosaProj {
 };
 
 /* C projection functions */
-
+//全局变量
 Vec2D sllxy (const GeoCoord& Geovect, SphIcosa& sphico,
              int tri);
 

@@ -97,7 +97,10 @@ template<class A> ostream& operator<< (ostream& stream, const DgResAdd<A>& add)
 
 } // ostream& operator<<
 
-////////////////////////////////////////////////////////////////////////////////
+/*////////////////////////////////dgidgg的集成类是DgDiscRF<DgQ2DICoord, DgGeoCoord, long double>/
+//DgIDGGSBase的继承类是    public DgDiscRFS<DgQ2DICoord, DgGeoCoord, long double> 却被就是多了一个分辨率参数 DgResAdd
+ DgIDGGBase的继承类是           DgDiscRF<DgQ2DICoord, DgGeoCoord, long double>
+////////////////////////////////////////////*/
 template<class A, class B, class DB> class DgDiscRFS
                                : public DgDiscRF<DgResAdd<A>, B, DB> {
 
@@ -157,10 +160,10 @@ template<class A, class B, class DB> class DgDiscRFS
 
       int nRes (void) const { return nRes_; }
 
-      bool isCongruent (void) const { return isCongruent_; }
-      bool isAligned   (void) const { return isAligned_; }
+      bool isCongruent (void) const { return isCongruent_; }//是否嵌套
+      bool isAligned   (void) const { return isAligned_; }//顶点是否重合
 
-      // no bounds checking
+      // no bounds checking   []这个运算符的重载 返回指定分辨率的grids_
 
       const DgDiscRF<A, B, DB>& operator[] (int res) const
                            { return *((*grids_)[res]); }
@@ -395,7 +398,7 @@ template<class A, class B, class DB> class DgDiscRFS
       }
 
    protected:
-
+//实现grids_格网的默认参数够早
       DgDiscRFS (DgRFNetwork& network, const DgRF<B, DB>& backFrame,
                  int nResIn, unsigned int aperture,
                  dgg::topo::DgGridTopology gridTopo = dgg::topo::Hexagon,
@@ -485,7 +488,7 @@ template<class A, class B, class DB> class DgDiscRFS
 
       unsigned int aperture_;
 
-      vector<const DgDiscRF<A, B, DB>*>* grids_;//存储多层格网的关键所在 ，将IDGG（DgDiscRF的子类） 和IDGGS （DgDiscRF的子类）联系起来
+      vector<const DgDiscRF<A, B, DB>*>* grids_;//存储多层格网的关键所在 ，将IDGG（DgDiscRF的子类） 分层存储 在IDGG内部DgdiscRFS2D也是继承子之歌类 用来存储平面不同格网
 
       int nRes_;
       bool isCongruent_;
@@ -535,9 +538,9 @@ template <class A, class B, class DB> class DgResAddConverter :
 
       int res (void) const { return res_; }
 
-      const DgDiscRFS<A, B, DB>& discRFS (void) const { return discRFS_; }
+      const DgDiscRFS<A, B, DB>& discRFS (void) const { return discRFS_; }//fromFrame
 
-      const DgDiscRF<A, B, DB>& discRF (void) const { return discRF_; }
+      const DgDiscRF<A, B, DB>& discRF (void) const { return discRF_; }//toFrame
 
       virtual A convertTypedAddress (const DgResAdd<A>& add) const
         {
@@ -608,12 +611,12 @@ template <class A, class B, class DB> class DgAddResConverter :
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////j加上分辨率和去掉分辨率操作///////////////////////////////////////////
 template <class A, class B, class DB> class Dg2WayResAddConverter
                                                : public Dg2WayConverter {
 
    public:
-
+///加上分辨率和去掉分辨率操作
       Dg2WayResAddConverter (const DgDiscRFS<A, B, DB>& fromFrame,
                              const DgDiscRF<A, B, DB>& toFrame, int res)
          : Dg2WayConverter

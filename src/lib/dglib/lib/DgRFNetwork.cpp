@@ -71,7 +71,7 @@ const DgConverterBase*
 DgRFNetwork::getConverter (const DgRFBase& fromFrame,
                                  const DgRFBase& toFrame) const
 {
-   // check for network match
+   // check for network match 查看是否是相同的网络 不在相同网络无法进行转换
 
    if (fromFrame.network() != *this && toFrame.network() != *this)
    {

@@ -32,7 +32,7 @@
 
 using namespace dgg::topo;
 
-//////////////////////////////////backFrameIn属于DgContCartRF 过渡空间//////////////////////////////////////////////
+//////////////////////////////////netowrk 是localnet 每一层idgg都有一个localnet backFrameIn属于DgContCartRF 放射变换 过度 归算坐标系//////////////////////////////////////////////
 DgDmdD4Grid2DS::DgDmdD4Grid2DS (DgRFNetwork& networkIn,
                const DgRF<DgDVec2D, long double>& backFrameIn, int nResIn,
                unsigned int apertureIn, bool isCongruentIn, bool isAlignedIn,
@@ -89,10 +89,12 @@ DgDmdD4Grid2DS::DgDmdD4Grid2DS (DgRFNetwork& networkIn,
       //cout << newName << " " << fac << ' ' << trans << endl;
         //构建转换器的过程
       const DgContCartRF* ccRF = DgContCartRF::makeRF(network(), newName + string("bf"));
-
+//放射变换的参数 旋转 评议 缩放 这个没有返回值 干什么用的？ :这里就是创建了两个转换器（）DgContAffineConverter DgContInvAffineConverter 和 是用于仿射变换的转换器 后面是参数 前面的rf用于network存储是哪到哪的转换
       Dg2WayContAffineConverter(backFrame(), *ccRF, (long double) fac, 0.0, trans);
-
+        //每一层IDGGs格网都有多层 idgg 其中又有一层Grid2DS 对应多层的Grid2D 但是只去对应层次的Grid2D作为idgg的平面格网
       (*grids_)[i] = DgDmdD4Grid2D::makeRF(network(), *ccRF, newName);
+
+//      上一级与下一级之间的转换
       Dg2WayResAddConverter<DgIVec2D, DgDVec2D, long double>(*this, *(grids()[i]), i);
 
       fac *= radix();

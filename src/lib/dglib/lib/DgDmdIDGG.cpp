@@ -87,16 +87,17 @@ DgDmdIDGG::initialize (void)
 
    // create some internal data structures
    setUndefLoc(makeLocation(undefAddress()));
+   //每一层都有一个
    sphIcosa_ = new DgSphIcosa(vert0(), azDegs());//根据 方位角和指定的经纬度确定球面的方向 并提前计算一些投影转换参数
 
    isAligned_ = false;
    isCongruent_ = false;
 
-   // initialize parent values as if this is grid res 0
+   // initialize parent values as if this is grid res 0 0层无法获取父格网 所以要放在循环外面
    long double parentScaleFac = 1.0;
    unsigned long long int parentNCells = 1;
 
-   // get actual parent values if there is a parent grid 循环创建dggs
+   // get actual parent values if there is a parent grid 循环创建dgg 需要知道上一层格网信息
    if (res() > 0) {
       const DgDmdIDGG& parentIDGG = dmdDggs().dmdIdgg(res() - 1);
 
@@ -106,6 +107,7 @@ DgDmdIDGG::initialize (void)
 
    // set-up local network to scale so that quad (and consequently dmd) edge
    // length is 1.0 信息保存在了局部路由里locNet_ ccFrame_单位是 double x double y 属于过渡坐标系坐标
+//   DgContCartRF这个类里也没有什么内容 就是求一下距离
    ccFrame_ = DgContCartRF::makeRF(locNet_, name() + "CC1");
    if (gridMetric() == D4)
       grid2DS_ = DgDmdD4Grid2DS::makeRF(locNet_, ccFrame(), res() + 1, 4, true, false, name() + string("D4H2DS"));
@@ -136,7 +138,7 @@ DgDmdIDGG::initialize (void)
       gridStats_.setNCells(10);
    else
       gridStats_.setNCells(parentNCells * 4);
-    //创建内部的转换器
+    //创建内部的转换器，父类的函数 所有的IDGG都要这样实现
    createConverters();
 
    ///// calculate the statistics /////

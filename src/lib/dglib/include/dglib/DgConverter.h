@@ -47,11 +47,11 @@ public DgConverterBase {
 
       DgConverter& operator= (const DgConverter& con)
          { DgConverterBase::operator=(con); return *this; }
-
+    //纯虚函数 对应的convert必须实现 其实是实现createConvertedAddress这个虚函数 让每个转换器都自己实现 实现的事一个新值给以前的地址没关系
       virtual ATo convertTypedAddress (const AFrom& addIn) const = 0;
 
    protected:
-
+    //        继承自父类的纯虚函数
       virtual DgAddressBase* createConvertedAddress
                                   (const DgAddressBase& addIn) const
 #if DGDEBUG
