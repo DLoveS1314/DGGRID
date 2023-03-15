@@ -187,7 +187,7 @@ DgBoundedIDGG::seqNumAddress (const DgQ2DICoord& add) const
    int q = add.quadNum();
 
    // get the quad offset
-
+//没有对q可能出现的错误进行判断 比如有些q被设置为20 仍然可以使用
    if (q > 0)
    {
       if (firstAdd().quadNum() == 0) offset++;

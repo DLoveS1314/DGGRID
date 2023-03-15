@@ -13,8 +13,8 @@ dggrid_operation GENERATE_GRID
 dggs_vert0_lat  90.0
 dggs_vert0_lon  0.0
 # specify the DGG
-dggs_type ISEA4D
-dggs_res_spec 0
+dggs_type ISEA4H
+dggs_res_spec 3
 
 # control the generation
 clip_subset_type WHOLE_EARTH
@@ -22,9 +22,9 @@ geodetic_densify 0.0
 
 # specify the output
 cell_output_type KML
-cell_output_file_name outputfiles/dmd_0_lat_90
+cell_output_file_name outputfiles/hex_3_lat_90
 point_output_type KML
-point_output_file_name outputfiles/dmd_0_point_lat_90
+point_output_file_name outputfiles/hex_3_point_lat_90
 kml_default_color ffff0000
 kml_default_width 6
 kml_description www.discreteglobalgrids.org

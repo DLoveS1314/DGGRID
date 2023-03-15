@@ -27,6 +27,7 @@ add_subdirectory(src/lib/shapelib)
 add_subdirectory(src/apps/dggrid)
 add_subdirectory(src/apps/appex)
 
+add_subdirectory(src/apps/caldgg)
 
 
 if(DOXYGEN_FOUND)

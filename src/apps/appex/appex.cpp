@@ -54,7 +54,7 @@ int main (int, char**)
 
    // all DGGS's must be created using a factory makeRF method
    // the DGGS is memory managed by the DgRFNetwork
-   const DgIDGGS4D * idggsDPtr = DgIDGGS4D::makeRF(net0, geoRF, vert0, azimuth, 10,"ISEA4D_D8","ISEA",dgg::topo::D8);
+   const DgIDGGS4D * idggsDPtr = DgIDGGS4D::makeRF(net0, geoRF, vert0, azimuth, 10,"ISEA4D_D8","ISEA",dgg::topo::D4);
 //    const DgIDGGS4H* idggsPtr = DgIDGGS4H::makeRF(net0, geoRF, vert0, azimuth, 10);
 //   const DgIDGGS4H& idggs = *idggsPtr;
     const DgIDGGS4D& idggs = *idggsDPtr;
@@ -94,8 +94,20 @@ int main (int, char**)
 //   cout << "* with densified cell boundary:\n" << verts << endl;
    
    DgLocVector neighbors;
+   DgQ2DICoord coord (10,DgIVec2D(0,dgg.maxJ()));
+    DgLocation * ij = dgg.makeLocation(coord);
+   dgg.setNeighbors(*ij, neighbors);
 
-   dgg.setNeighbors(*thePt, neighbors);
+   for (int i = 0 ;i<neighbors.size();i++)
+   {
+      
+      DgAddress<DgQ2DICoord> *  add1= (DgAddress<DgQ2DICoord> *)(neighbors[i].address());
+      int seqnum =loc1.seqNumAddress(add1->address());
+      cout<< "seqnum"<<seqnum<<endl;
+   }
+    cout<< "coord"<<coord<<endl;
+    cout<< "res"<<dgg.gridStats()<<endl;
+
 //   cout << "*neighbors:" << neighbors << endl;
    // we can get the cell's center point by converting the cell back to geoRF
 //   geoRF.convert(thePt);

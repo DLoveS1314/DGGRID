@@ -34,7 +34,7 @@ long double
 DgGeoCoord::gcDist (const DgGeoCoord& g1, const DgGeoCoord& g2,
                     bool rads)
 /*
- * 与spheredist所求相同
+ * 与spheredist所求相同 返回大圆弧距离 也就是返回
    return great circle distance in radians between g1 and g2.
 
    CRC Math, 1991, pp. 129-130.
@@ -366,7 +366,7 @@ void printPlaneTri (const PlaneTri& tri)
 /******************************************************************************/
 Vec3D vecAdd (const Vec3D& A, const Vec3D& B)
 /*
-   Calculate and return A + B.
+   Calculate and return A + B.向量加法
 */
 {
    Vec3D C;
@@ -382,7 +382,7 @@ Vec3D vecAdd (const Vec3D& A, const Vec3D& B)
 /******************************************************************************/
 Vec3D vecSub (const Vec3D& A, const Vec3D& B)
 /*
-   Calculate and return A - B.
+   Calculate and return A - B.向量减法
 */
 {
    Vec3D C;
@@ -398,6 +398,7 @@ Vec3D vecSub (const Vec3D& A, const Vec3D& B)
 /******************************************************************************/
 Vec3D vecCross (const Vec3D& A, const Vec3D& B)
 /*
+计算叉乘
    Calculate and return A x B.
 */
 {
@@ -414,6 +415,7 @@ Vec3D vecCross (const Vec3D& A, const Vec3D& B)
 /******************************************************************************/
 long double vecMag (const Vec3D& V)
 /*
+   计算并返回一个向量V的大小。 二范数开平方
    Calculate and return the magnitude of a vector V.
 */
 {
@@ -455,7 +457,7 @@ long double sqrMetersToExcessD (long double area)
 
 } /* long double metersToExcessD */
 
-/******************************************************************************/
+/***********************边长转弧度*******************************************************/
 long double metersToGCDegrees (long double meters)
 {
    long double earthCircum = (2.0L * M_PI * DgGeoSphRF::earthRadiusKM());
@@ -539,6 +541,7 @@ GeoCoord xyzll(const Vec3D& v0)
 /*****************************返回三角形中心点 转到xyz坐标系下算的*************************************************/
 GeoCoord sphTricenpoint(GeoCoord sp[3])
 /*
+   计算并返回球状三角形的中心点 输入和输出单位为度。
    Calculate and return the center point of a sphere triangle
    Input and output unit is degree.
 */
@@ -559,6 +562,7 @@ GeoCoord sphTricenpoint(GeoCoord sp[3])
 /******************************************************************************/
 long double chorddist(const GeoCoord& ll1, const GeoCoord& ll2)
 /*
+   计算球体上两点之间的弦长 输入单位为度。输出单位视地球半径为一个单位。
    Calculate the chord distance between two points on the sphere
    Input unit is degree. Output unit regard the earth's radius as one unit.
 */
@@ -579,6 +583,7 @@ long double chorddist(const GeoCoord& ll1, const GeoCoord& ll2)
 /******************************************************************************/
 long double spheredist(const GeoCoord& ll1, const GeoCoord& ll2)
 /*
+   计算球体上两点之间的球体距离 输入和输出单位为弧度。
    Calculate the sphere distance between two points on the sphere
    Input and Output unit is in radius.
 */
@@ -629,7 +634,7 @@ void sphTriSolve(SphTri* tri)
 
  } /* void sphTriSolve(SphTri* tri) */
 
-/******************************************************************************/
+/********************************返回的是弦长中心点利用归一化投影到单位球上**********************************************/
 GeoCoord GCmidpoint(const GeoCoord& pp1, const GeoCoord& pp2)
 {
   Vec3D pt1,pt2,mpt;
@@ -833,6 +838,7 @@ int ptinsphtri(const GeoCoord& pt, GeoCoord sTri[3])
 /******************************************************************************/
 GeoCoord GCdaz(const GeoCoord& pt, long double distance, long double az)
 /*
+  通过方位角和距离 以及一个点 确定另外一个点
   compute and return the point whose azimuth (az) and distance
   (distance) relative to a known point (pt) are given.
   input parameter distance and az are in radius, pt in degree.

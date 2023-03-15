@@ -53,7 +53,7 @@ class DgBoundedIDGG : public DgBoundedRF<DgQ2DICoord, DgGeoCoord, long double> {
                          { return idgg().undefAddress(); }
 
       const DgIDGGBase& idgg (void) const { return IDGG_; }
-
+      // 通过记录这个数量 免去记录res，其实记录res更好 但是不符合 Dgbounded 的逻辑，应该Dgboundeds才有res
       unsigned long long int offsetPerQuad (void) const { return offsetPerQuad_; }
 //        行列号转seqnum
       virtual unsigned long long int seqNumAddress (const DgQ2DICoord& add) const;

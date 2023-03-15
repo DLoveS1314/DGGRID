@@ -172,7 +172,7 @@ class DgDiscRF : public DgRF<A, long long int> {
       virtual DgPolygon* makeVertices (const A& add) const
                { DgPolygon* vec = new DgPolygon(backFrame());
                  setVertices(add, *vec);  return vec; }
-
+      // 返回的是局部指针 可以返回  但c++不能返回返回的局部变量的指针
       virtual DgLocation* makePoint (const A& add) const
                { DgLocation* pt = new DgLocation(backFrame());
                  setPoint(add, *pt);  return pt; }

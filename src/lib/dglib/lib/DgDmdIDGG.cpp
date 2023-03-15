@@ -146,7 +146,7 @@ DgDmdIDGG::initialize (void)
    gridStats_.setPrecision(precision());
 
    long double tmpLen = DgGeoSphRF::icosaEdgeKM();
-////// NEEDS UPDATING
+////// NEEDS UPDATING 每一层参数计算
    gridStats_.setCellDistKM(tmpLen / pow(sqrt((long double) aperture()), res()));
 
       // a = globeArea / (#cells - 2);

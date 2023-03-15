@@ -12,5 +12,5 @@ dggrid_operation OUTPUT_STATS
 
 # specify the DGG
 dggs_type ISEA4H
-dggs_res_spec 1
+dggs_res_spec 8
  

@@ -115,7 +115,7 @@ DgRF<A, D>::makeLocation (const A& addIn) const
    return buildLocation(new DgAddress<A>(addIn));
 } // DgLocation* DgRF<A>::makeLocation
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////返回坐标空间里的坐标 这里必须是有相同的rf 不同的话是使用convert 再使用getAddress/////////////////////////////////////////////////
 template<class A, class D> const A*
 DgRF<A, D>::getAddress (const DgLocation& loc) const
 {
