@@ -52,7 +52,7 @@ DgBoundedIDGG::DgBoundedIDGG (const DgIDGGBase& IDGGin)
       setLastAdd(DgQ2DICoord(10, DgIVec2D(idgg().maxI(), idgg().maxJ())));
 
       if (idgg().gridTopo() == dgg::topo::Triangle)
-         offsetPerQuad_ = idgg().mag() * (idgg().maxJ() + 1);//计算每个面对应的格网数
+         offsetPerQuad_ = idgg().mag() * (idgg().maxJ() + 1);//计算每个面对应的格网数不同拓扑 结果不同
       else
          offsetPerQuad_ = idgg().mag() * idgg().mag();
    }

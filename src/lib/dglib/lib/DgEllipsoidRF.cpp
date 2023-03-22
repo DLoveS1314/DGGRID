@@ -634,7 +634,7 @@ void sphTriSolve(SphTri* tri)
 
  } /* void sphTriSolve(SphTri* tri) */
 
-/********************************返回的是弦长中心点利用归一化投影到单位球上**********************************************/
+/********************************返回的是弦长中心点利用归一化投影到单位球上 也就是返回大圆弧的中点**********************************************/
 GeoCoord GCmidpoint(const GeoCoord& pp1, const GeoCoord& pp2)
 {
   Vec3D pt1,pt2,mpt;
@@ -672,6 +672,10 @@ GeoCoord GCintersect(const GeoCoord& sv11, const GeoCoord& sv12,
           sv21 and sv22 respectively
   sign=0: two whole great circle with one pass sv11 and sv12, one pass
           sv21 and sv22, return the intersect point on North Hemisphere
+   sign=1：两个大圆弧段，两端分别为 sv11 和 sv12，
+           分别为 sv21 和 sv22
+   sign=0: 两个完整的大圆，一次通过 sv11 和 sv12，一次通过
+           sv21 和 sv22，返回北半球的交点
 */
  {
   GeoCoord pt;
