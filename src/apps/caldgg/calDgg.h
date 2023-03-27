@@ -17,7 +17,7 @@ public:
     const DgIDGGBase& idgg (void) const { return IDGG_; }
     // 计算面积
     long double calarea(DgQ2DICoord& add,int ptsPerEdgeDensify=0)const;
-    // 得到多边形顶点
+    // 得到多边形顶点(经纬度坐标)
     void setAddVertices (const DgQ2DICoord& add,
                                    DgPolygon& vec, int densify=0) const;
  
@@ -30,30 +30,29 @@ public:
     DgGeoCoord calintersect(const GeoCoord& sv11, const GeoCoord& sv12,
                      const GeoCoord& sv21, const GeoCoord& sv22, int sign) const;
     
+    // 计算临近 后续添加所有格网的临近 这里只实现了菱形的八邻近
     void calnei (const DgQ2DICoord& add,
                                    DgLocVector& vec) const;
     // 计算以当前编码为中心的两个临近编码练成的二面角
-    long double  calangle (const DgQ2DICoord& center,
-                                   const DgQ2DICoord& add1,const DgQ2DICoord& add2) const;
+//    long double  calangle (const DgQ2DICoord& center,
+//                                   const DgQ2DICoord& add1,const DgQ2DICoord& add2) const;
+    
     long double  calangle (const DgQ2DICoord& center,
                            const DgQ2DICoord& add1,const DgQ2DICoord& add2) const;
     //    生成菱形四邻域和八邻域
     vector<DgQ2DICoord> dmdfourneicell(DgQ2DICoord& add1 ) const;
     vector<DgQ2DICoord> dmdneicell(const DgQ2DICoord& add1 ) const;
 
-
     long double maxval(const long double val1, const long double val2) const
     {
     /*
         return the maxmum of two variables
     */
-            long double maxx;
-            if (val1>val2) maxx=val1;
-            else maxx=val2;
-            return maxx;
+        long double maxx;
+        if (val1>val2) maxx=val1;
+        else maxx=val2;
+        return maxx;
     } /* long double maxval */
-
- 
     long double minval(const long double val1, const long double val2) const
     {
     /*

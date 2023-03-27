@@ -76,6 +76,7 @@ void testsphTriSolve()
 
 void testcalange ()
 {
+    /*比较种生成角度的方式 结果是否相同*/
     DgRFNetwork net0;
     const DgGeoSphRF& geoRF = *(DgGeoSphRF::makeRF(net0, "GS0"));
     DgGeoCoord vert0(0.0L, 90.0L, false); // args: lon, lat, isRadians
@@ -90,6 +91,8 @@ void testcalange ()
     DgPolygon poly;
     cdgg.setAddVertices(dggadress,poly);
     cout<< "complete"<<endl;
+    cout<< poly<<endl;
+
     cdgg.calangle(dggadress,*dgg.getAddress(poly[0]),*dgg.getAddress(poly[1]));
 //    const DgBoundedIDGGS dgBoundedIdggs = DgBoundedIDGGS(*idggsDPtr);
 //    DgResAdd<DgQ2DICoord>  add = DgResAdd ( DgQ2DICoord (1, DgIVec2D(3,5)) ,  3);

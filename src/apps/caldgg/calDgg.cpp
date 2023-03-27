@@ -254,6 +254,8 @@ long double calDgg::calangle(const DgQ2DICoord &center, const DgQ2DICoord &add1,
 
     long double l1[2],l2[2],l3[2],edges[2];
     cout<<"夹角"<<bigA<<endl;
+
+	
     l1[0]=centerg.lat(); l1[1]=centerg.lon();
     l2[0]=addg1.lat(); l2[1]=addg1.lon();
     l3[0]=addg2.lat(); l3[1]=addg2.lon();
