@@ -14,6 +14,7 @@ int main (int, char**)
 //    testIDGGbounds();
     // testcalArea();
     testcalange();
+    printf("end");
     // DgRFNetwork net0;
     // const DgGeoSphRF& geoRF = *(DgGeoSphRF::makeRF(net0, "GS0"));
     // DgGeoCoord vert0(0.0L, 90.0L, false); // args: lon, lat, isRadians

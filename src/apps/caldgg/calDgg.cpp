@@ -4,7 +4,9 @@
 
 #include "calDgg.h"
 #include "dglib/DgEllipsoidRF.h"
-long double calDgg::calarea(DgQ2DICoord &add, int ptsPerEdgeDensify) const
+#include "dglib/DgBoundedIDGG.h"
+ 
+long double calDgg::calarea(const DgQ2DICoord &add, int ptsPerEdgeDensify) const
 {
     // cout<<"res "<<idgg().res()<<endl;
     //        获取边界点
@@ -25,23 +27,64 @@ long double calDgg::calarea(DgQ2DICoord &add, int ptsPerEdgeDensify) const
     // DgGeoCoord center = static_cast<const DgAddress<DgGeoCoord>*>(idgg().geoRF().convert(loc)->address())->address();
     // DgGeoCoord center = *(idgg().geoRF().getAddress(*idgg().geoRF().convert(loc)));
     // cout << "* lies in cell " << *loc << endl;
-
-    double area = (this->geoPolyArea(verts, *center))*DgGeoSphRF::earthRadiusKM()*DgGeoSphRF::earthRadiusKM();
+	double r2 =1.0;
+	if(calDgg::useearthRadius)
+	{
+		r2=DgGeoSphRF::earthRadiusKM()*DgGeoSphRF::earthRadiusKM() ;
+	}
+    double area =  this->geoPolyArea(verts, *center) * r2 ;
     // cout << "* area  " << area*DgGeoSphRF::earthRadiusKM()*DgGeoSphRF::earthRadiusKM() << endl;
     // delete loc;
     return  area;
 }
+
+long double calDgg::calper( const DgQ2DICoord &add, int ptsPerEdgeDensify) const
+{
+	DgPolygon verts;
+    // shared_ptr<DgLocation> loc(idgg().makeLocation(add) ) ;/
+    this->setAddVertices(add, verts, ptsPerEdgeDensify);
+	double r = 1.0;
+    if (calDgg::useearthRadius)//如果使用地球半径 那就乘上
+	{
+        r = DgGeoSphRF::earthRadiusKM() ;
+	} 
+	double per =  this->geoPolyper(verts ) * r ;
+   return per;
+}
+
+long double calDgg::calzsc(const DgQ2DICoord &add, int ptsPerEdgeDensify) const
+{
+	// 分母
+	long double per = this->calper(add,ptsPerEdgeDensify);
+
+
+	long double area = this->calarea(add,ptsPerEdgeDensify);
+	double r2 =1.0;
+	if(calDgg::useearthRadius)
+	{
+		r2=DgGeoSphRF::earthRadiusKM()*DgGeoSphRF::earthRadiusKM() ;
+	}
+	double const pi = 3.141592653589793238;
+	long double sqrtdata = 4*pi*area -area*area/r2 ; //参考罗师姐论文
+	// 分子
+	long double Numerator =  sqrt(sqrtdata);
+	
+	long double zsc =  Numerator/per;
+   	return zsc;
+}
+
 long double calDgg::geoPolyArea (const DgPolygon& poly, const DgGeoCoord& center)  const
 
 {
-    //
-// returns area of spherical polygon in radians;
-//
-// assumes DgAddressBase for poly is DgGeoCoord
-//
-// Assumes poly is a "reasonably" convex polygon (i.e. a cell bouncary) and
-// that center is an interior point.
-//
+
+    // 保证参考系已经是DgGeoSphRF空间才能进行计算
+	// returns area of spherical polygon in radians;
+	//
+	// assumes DgAddressBase for poly is DgGeoCoord
+	//
+	// Assumes poly is a "reasonably" convex polygon (i.e. a cell bouncary) and
+	// that center is an interior point.
+	//
     long double totArea = 0.0L;
 
     const DgGeoSphRF* geoRF = dynamic_cast<const DgGeoSphRF*>(&poly.rf());
@@ -58,6 +101,30 @@ long double calDgg::geoPolyArea (const DgPolygon& poly, const DgGeoCoord& center
     }
 
     return totArea;
+
+}
+
+
+long double calDgg::geoPolyper (const DgPolygon& poly )  const
+
+{
+ 
+    long double totper = 0.0L;
+
+    const DgGeoSphRF* geoRF = dynamic_cast<const DgGeoSphRF*>(&poly.rf());
+    if (geoRF == 0)
+        report("DgGeoCoord::geoPolyArea() non-geo polygon", DgBase::Fatal);
+
+    // do each sub-triangle
+    for (int i = 0; i < poly.size(); i++)
+    {
+        const DgGeoCoord& v1 = *geoRF->getAddress(poly[i]);
+        const DgGeoCoord& v2 = *geoRF->getAddress(poly[(i + 1) % poly.size()]); //通过取余实现 roll
+
+        totper += DgGeoCoord::gcDist( v1, v2);
+    }
+
+    return totper;
 
 }
 
@@ -78,13 +145,154 @@ DgQ2DICoord calDgg::getQ2DI(const DgGeoCoord &add) const
     const DgQ2DICoord* qij = idgg().getAddress( *(idgg().convert(loc.get())) ) ;
     return  *qij;
 }
+vector<long double> calDgg::calmaxmintotaldis(const DgQ2DICoord &add) const
+{
+	shared_ptr<DgLocation> loc(idgg().makeLocation(add) ) ;
+
+    // const DgGeoCoord* center  = idgg().geoRF().getAddress(*idgg().geoRF().convert(loc.get()));
+	vector<long double> returnval ;
+	DgLocVector locv;
+	this->calnei(add,locv);
+	long double minVal = LDBL_MAX ;
+	long double maxVal = 0; //加个大写避免与类中函数名minval重复 防止出现意外情况
+	long double totalval = 0;
+
+	// do each point
+    for (int i = 0; i < locv.size(); i++)
+    {
+		long double dis = this->caldistance(add,*idgg().getAddress(locv[i]));
+       	totalval+=dis;
+		minVal =this->minval(minVal,dis);
+		maxVal =  this->maxval(maxVal,dis);
+
+    }
+	long double max_min_ratio = maxVal/minVal;
+	long double mean = totalval/locv.size();
+	returnval.push_back(max_min_ratio);
+	returnval.push_back(mean);
+	// returnval.push_back(maxval);
+
+    return returnval;
+}
+
+// calmaxmintotalcsd 的辅助函数 不再放在类里 不再计算公共边
+// vector<DgGeoCoord> Getmindis(vector<DgAddressBase*>add1,vector<DgAddressBase*>add2)  
+// {
+// 	//先转化为
+// 		// DgAddress<DgVertex2DDCoord>* fullAdd =
+//     //                dynamic_cast< DgAddress<DgVertex2DDCoord>* >(v[i]);
+// 	vector<DgGeoCoord> coords;
+// 	return coords
+
+// }
+vector<long double>  calDgg::calmaxmintotalcsd(const DgQ2DICoord& add) const 
+{
+
+	//求邻域
+	vector<long double> mid_dis_vec;//按照默认的neis顺序记录每个邻近的两中点间距离
+
+	shared_ptr<DgLocation> loc( idgg().makeLocation(add) ) ;
+
+    const DgGeoCoord* center  = idgg().geoRF().getAddress(*idgg().geoRF().convert(loc.get()));
+
+	// 先求得格网本身的边界中点
+	DgPolygon verts_c; //rf是 georf
+	this->setAddVertices(add,verts_c,0);
+	// vector<DgAddressBase*>& v_c = verts_c.addressVec();
+	vector<DgGeoCoord> midpoints_c;
+
+	//求面邻近：暂且无法求三角形的 后续把师姐给的三角形面代码加上
+	vector<DgQ2DICoord> neis = this->edgecell(add);
+	//邻域循环 得到每一个面csd 两中心点距离
+	for (int nei = 0; nei < neis.size(); nei++)
+    {
+
+		//计算两个格网间中心点位置
+
+		DgGeoCoord nei_midpoint = this->calmidpoint(add,neis[nei]);
+
+		//循环计算 与格网本身的边界中点的距离 求的的最小距离就是真正的两中点间距离
+		long double min_mid_dis = LDBL_MAX;
+		for (int mp=0;mp <midpoints_c.size();mp++)
+		{
+			long double mid_dis = this->caldistance(nei_midpoint,midpoints_c[mp]);
+			min_mid_dis =this->minval(min_mid_dis,mid_dis);
+		}
+		mid_dis_vec.push_back(min_mid_dis);
+
+    }
+	vector<long double> returnval ;
+ 
+	long double minVal = LDBL_MAX ;
+	long double maxVal = 0; //加个大写避免与类中函数名minval重复 防止出现意外情况
+	long double totalval = 0;
+	for(int m_v =0;m_v <mid_dis_vec.size();m_v++ ) 
+	{
+		long double dis =mid_dis_vec[m_v];
+       	totalval+=dis;
+		minVal =this->minval(minVal,dis);
+		maxVal =  this->maxval(maxVal,dis);
+	}
+  
+	long double max_min_ratio = maxVal/minVal;
+	long double mean = totalval/mid_dis_vec.size();
+	returnval.push_back(max_min_ratio);
+	returnval.push_back(mean);
+	// returnval.push_back(maxval);
+
+    return returnval;
+
+}
+vector<long double> calDgg::calmaxmintotalangle(const DgQ2DICoord &add) const
+{
+	shared_ptr<DgLocation> loc(idgg().makeLocation(add) ) ;
+
+    const DgGeoCoord* center  = idgg().geoRF().getAddress(*idgg().geoRF().convert(loc.get()));
+	vector<long double> returnval ;
+	DgLocVector locv;
+	this->calnei(add,locv);
+	long double minVal = LDBL_MAX ;
+	long double maxVal = 0; //加个大写避免与类中函数名minval重复 防止出现意外情况
+	long double totalval = 0;
+
+	// do each point
+    for (int i = 0; i < locv.size(); i++)
+    {
+		const DgQ2DICoord& add1 = *idgg().getAddress(locv[i]);
+		const DgQ2DICoord& add2 = *idgg().getAddress(locv[ (i+1)% locv.size() ] );//实现roll循环
+
+		long double angle = this->calangle(add,add1,add2);
+
+       	totalval+=angle;
+		minVal =this->minval(minVal,angle);
+		maxVal =  this->maxval(maxVal,angle);
+
+    }
+	long double max_min_ratio = maxVal/minVal;
+	long double mean = totalval/locv.size();
+	returnval.push_back(max_min_ratio);
+	returnval.push_back(mean);
+	// returnval.push_back(maxval);
+
+    return returnval;
+}
 // useearthRadius 默认是true
-long double calDgg::caldistance(const DgQ2DICoord &add,const  DgQ2DICoord &add1,bool useearthRadius ) const
+long double calDgg::caldistance(const DgQ2DICoord &add,const  DgQ2DICoord &add1  ) const
 {
     DgGeoCoord addg = this->getGeocoord(add);
     DgGeoCoord addg1 = this->getGeocoord(add1);
     long double distance =   DgGeoCoord::gcDist(addg, addg1); 
-    if (useearthRadius)//如果使用地球半径 那就乘上
+    if (calDgg::useearthRadius)//如果使用地球半径 那就乘上
+      {
+        distance = DgGeoSphRF::earthRadiusKM() * distance;
+       } 
+    return distance;
+}
+
+long double calDgg::caldistance(const DgGeoCoord &add, const DgGeoCoord &add1 ) const
+{
+	long double distance =   DgGeoCoord::gcDist(add, add1); 
+    if (calDgg::useearthRadius)//如果使用地球半径 那就乘上
       {
         distance = DgGeoSphRF::earthRadiusKM() * distance;
        } 
@@ -100,10 +308,16 @@ DgGeoCoord calDgg::calmidpoint(const DgQ2DICoord& add,const DgQ2DICoord& add1 ) 
     return midpoint;
 }
 
+DgGeoCoord calDgg::calmidpoint(const DgGeoCoord &add, const DgGeoCoord &add1) const
+{
+	DgGeoCoord midpoint =   DgGeoSphRF::midPoint(add, add1); 
+    return DgGeoCoord();
+}
+
 DgGeoCoord calDgg::calintersect(const GeoCoord &sv11, const GeoCoord &sv12, const GeoCoord &sv21, const GeoCoord &sv22, int sign) const
 {   
   /*
-  参考的GCintersect
+  参考的 GCintersect
         sign=1：两个大圆弧段，两端分别为 sv11 和 sv12，
             分别为 sv21 和 sv22
         sign=0: 两个完整的大圆，一次通过 sv11 和 sv12，一次通过
@@ -121,9 +335,11 @@ DgGeoCoord calDgg::calintersect(const GeoCoord &sv11, const GeoCoord &sv12, cons
     p12=llxyz(sv12);
     p21=llxyz(sv21);
     p22=llxyz(sv22);
+
     nn1.x=p11.y*p12.z-p12.y*p11.z;
     nn1.y=-p11.x*p12.z+p12.x*p11.z;
     nn1.z=p11.x*p12.y-p12.x*p11.y;
+
     nn2.x=p21.y*p22.z-p22.y*p21.z;
     nn2.y=-p21.x*p22.z+p22.x*p21.z;
     nn2.z=p21.x*p22.y-p22.x*p21.y;
@@ -203,14 +419,25 @@ DgGeoCoord calDgg::calintersect(const GeoCoord &sv11, const GeoCoord &sv12, cons
     }
 }
 
+DgGeoCoord calDgg::calintersect(const DgGeoCoord &g11, const DgGeoCoord &g12, const DgGeoCoord &g21, const DgGeoCoord &g22, int sign) const
+{
+   GeoCoord sv11, sv12, sv21,sv22;
+   sv11.lon = g11.lon(); sv11.lat = g11.lat();
+   sv12.lon = g12.lon(); sv12.lat = g12.lat();
+   sv21.lon = g21.lon(); sv21.lat = g21.lat();
+
+   sv22.lon = g22.lon(); sv22.lat = g22.lat();
+    return DgGeoCoord();
+}
+
 /// @brief Calculate the adjacent grid of idgg, only realize the rhombus
 /// @param add Piece number row number column number
-/// @param vec saved structure
+/// @param vec saved structure 保存生成的邻域编码 编码是QIj 的location 
 void calDgg::calnei(const DgQ2DICoord &add, DgLocVector &vec) const
 {
 
     // //重写了 DgDiscRF setAddNeighbors
-    //DgLocVector在 DgDiscRF setNeighbors 已经转化为了DGIDGG空间 也就是Q i j
+    //DgLocVector在 DgDiscRF setNeighbors 已经转化为了DGIDGG空间 也就是Q i j空间
    if (this->idgg().gridTopo()== Diamond)
    {
        if (this->idgg().gridMetric() == D4)//现在不存在D8的菱形 所以只能D4菱形 也就是只能边临近和角临近选择一样
@@ -228,9 +455,10 @@ void calDgg::calnei(const DgQ2DICoord &add, DgLocVector &vec) const
    }
 }
 
+
 long double calDgg::calangle(const DgQ2DICoord &center, const DgQ2DICoord &add1, const DgQ2DICoord &add2) const
 {
-    // 改编 自DgGeoCoord::geoTriArea
+    // 改编 自DgGeoCoord::geoTriArea 返回的是弧度 
     DgGeoCoord centerg = this->getGeocoord(center);
     DgGeoCoord addg1 = this->getGeocoord(add1);
     DgGeoCoord addg2 = this->getGeocoord(add2);
@@ -253,33 +481,82 @@ long double calDgg::calangle(const DgQ2DICoord &center, const DgQ2DICoord &add1,
    long double bigA = 2.0L * atanl(k / sinsa);
 
     long double l1[2],l2[2],l3[2],edges[2];
-    cout<<"夹角"<<bigA<<endl;
+    // cout<<"夹角"<<bigA<<endl;
 
-	
-    l1[0]=centerg.lat(); l1[1]=centerg.lon();
-    l2[0]=addg1.lat(); l2[1]=addg1.lon();
-    l3[0]=addg2.lat(); l3[1]=addg2.lon();
-    edges[0]=acosl(cosl(M_PI_2-l2[0])*cosl(M_PI_2-l3[0])+
-            sinl(M_PI_2-l2[0])*sinl(M_PI_2-l3[0])*cosl(l2[1]-l3[1]));
-    edges[1]=acosl(cosl(M_PI_2-l1[0])*cosl(M_PI_2-l3[0])+
-            sinl(M_PI_2-l1[0])*sinl(M_PI_2-l3[0])*cosl(l1[1]-l3[1]));
-    edges[2]=acosl(cosl(M_PI_2-l2[0])*cosl(M_PI_2-l1[0])+
-            sinl(M_PI_2-l2[0])*sinl(M_PI_2-l1[0])*cosl(l2[1]-l1[1]));
-    long double angles =acosl((cosl(edges[0])-cosl(edges[1])*
-               cosl(edges[2]))/(sinl(edges[1])*sinl(edges[2])));
-    cout<<"夹角"<<angles<<endl;
-   
-  
- 
+	// 经过测试两个结果相同
+    // l1[0]=centerg.lat(); l1[1]=centerg.lon();
+    // l2[0]=addg1.lat(); l2[1]=addg1.lon();
+    // l3[0]=addg2.lat(); l3[1]=addg2.lon();
+    // edges[0]=acosl(cosl(M_PI_2-l2[0])*cosl(M_PI_2-l3[0])+
+    //         sinl(M_PI_2-l2[0])*sinl(M_PI_2-l3[0])*cosl(l2[1]-l3[1]));
+    // edges[1]=acosl(cosl(M_PI_2-l1[0])*cosl(M_PI_2-l3[0])+
+    //         sinl(M_PI_2-l1[0])*sinl(M_PI_2-l3[0])*cosl(l1[1]-l3[1]));
+    // edges[2]=acosl(cosl(M_PI_2-l2[0])*cosl(M_PI_2-l1[0])+
+    //         sinl(M_PI_2-l2[0])*sinl(M_PI_2-l1[0])*cosl(l2[1]-l1[1]));
+    // long double angles =acosl((cosl(edges[0])-cosl(edges[1])*
+    //            cosl(edges[2]))/(sinl(edges[1])*sinl(edges[2])));
+    // cout<<"夹角"<<angles<<endl;
+	return  bigA ;
 }
+vector<DgQ2DICoord> calDgg::edgecell(const DgQ2DICoord &add) const
+	{
+		// 改写自 DgIDGGBase::setAddNeighbors 只能处理菱形和六边形 三角形不可以
+		// DGGRIDv7.7 currently only supports neighbors for hexagon and diamond
+		// grids (not triangle grids).
 
- 
+		// DgLocVector vec;
+		// vec.clearAddress();
+		vector<DgQ2DICoord> vec;
+		// //重写了 DgDiscRF setAddNeighbors
+		//DgLocVector在 DgDiscRF setNeighbors 已经转化为了DGIDGG空间 也就是Q i j
+		//空的vector d但是 参考系变成了grid2D() 先求在一个面片里的行列号 边界处有错误的话 在后面改写
+		DgLocVector ngh2d(idgg().grid2D());
+		idgg().grid2D().setAddNeighbors(add.coord(), ngh2d);
+		//cout << " >> DgIDGGBase::setAddNeighbors center: " << add << endl;
+		//cout << "  ngh2d: " << ngh2d << endl;
+		//cout << " isCongruent: " << (isCongruent() ? "yes" : "no");
 
- 
+		int q = add.quadNum();
+		DgLocVector ngh2dNoDup(idgg());//开始处理跨面
+		DgIVec2D c;
+		for (int i = 0; i < ngh2d.size(); i++)
+		{
+			DgQ2DICoord c2di(q, *idgg().grid2D().getAddress(ngh2d[i])); //这个时候是有错误的 因为他包含了边界点
+	//cout << "*** i: " << i << " " << c2di;
+			const DgBoundedIDGG& bndRF =idgg().bndRF();
+			c2di = bndRF.q2dixToQ2di(c2di);//纠正错误的边界编码
+	//cout << " -> " << c2di << endl;
 
-vector<DgQ2DICoord> calDgg::dmdfourneicell(DgQ2DICoord &add1) const
-{
-   return vector<DgQ2DICoord>();
+			// check for duplicates
+			bool keeper = true;
+			if (!idgg().isCongruent() && add.coord() == DgIVec2D(0, 0))
+			{
+				for (int i = 0; i < ngh2dNoDup.size(); i++)
+				{
+					const DgQ2DICoord& veci = *idgg().getAddress(ngh2dNoDup[i]);
+	//cout << "   " << i << " " << veci << " -> " << (c2di == veci) <<  endl;
+					if (c2di == veci) 
+					{
+						keeper = false;
+						break;
+					}
+				}
+			}
+
+			if (keeper)
+			{
+
+				vec.push_back(c2di);
+				// DgLocation* tmpLoc = idgg().makeLocation(c2di);
+				// ngh2dNoDup.push_back(*tmpLoc);
+				// delete tmpLoc;
+			}
+		}
+		// for (int i = 0; i < ngh2dNoDup.size(); i++)
+		// 	vec.push_back(ngh2dNoDup[i]);
+		// for (int i = 0; i < ngh2dNoDup.size(); i++)
+		// 	vec.push_back(ngh2dNoDup[i]);
+	return vec;
 }
 
 vector<DgQ2DICoord> calDgg::dmdneicell(const DgQ2DICoord &add1) const

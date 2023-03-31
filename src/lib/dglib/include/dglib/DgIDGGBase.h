@@ -177,8 +177,8 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
       int allocRes_;
       bool isClassI_;
       bool isClassIII_;
-      bool isAligned_;
-      bool isCongruent_;
+      bool isAligned_;//对齐
+      bool isCongruent_;//一致
 
       long long int mag_;
       long long int maxD_;

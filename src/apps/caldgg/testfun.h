@@ -88,12 +88,13 @@ void testcalange ()
 //    static_cast<const DgIDGG&>(idgg);
     calDgg cdgg = calDgg(dgg);
     DgQ2DICoord dggadress = DgQ2DICoord(2,DgIVec2D(10,10));
-    DgPolygon poly;
-    cdgg.setAddVertices(dggadress,poly);
+    vector<DgQ2DICoord> dggadress_nei = cdgg.dmdneicell(dggadress);
+    // DgPolygon poly;
+    // cdgg.setAddVertices(dggadress,poly);
     cout<< "complete"<<endl;
-    cout<< poly<<endl;
+    // cout<< poly<<endl;
 
-    cdgg.calangle(dggadress,*dgg.getAddress(poly[0]),*dgg.getAddress(poly[1]));
+    cdgg.calangle(dggadress,dggadress_nei[0],dggadress_nei[1]);
 //    const DgBoundedIDGGS dgBoundedIdggs = DgBoundedIDGGS(*idggsDPtr);
 //    DgResAdd<DgQ2DICoord>  add = DgResAdd ( DgQ2DICoord (1, DgIVec2D(3,5)) ,  3);
 //    unsigned long long int seqnum = dgBoundedIdggs.seqNumAddress(add);
