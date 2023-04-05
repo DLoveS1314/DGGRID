@@ -5,7 +5,17 @@
 #include "calDgg.h"
 #include "dglib/DgEllipsoidRF.h"
 #include "dglib/DgBoundedIDGG.h"
- 
+#include <dglib/DgOutputStream.h>
+#include <dglib/DgInputStream.h>
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <dirent.h>
+#include<filesystem>
+namespace fs = std::filesystem;
+bool calDgg::useearthRadius = true;
 long double calDgg::calarea(const DgQ2DICoord &add, int ptsPerEdgeDensify) const
 {
     // cout<<"res "<<idgg().res()<<endl;
@@ -145,13 +155,14 @@ DgQ2DICoord calDgg::getQ2DI(const DgGeoCoord &add) const
     const DgQ2DICoord* qij = idgg().getAddress( *(idgg().convert(loc.get())) ) ;
     return  *qij;
 }
+
 vector<long double> calDgg::calmaxmintotaldis(const DgQ2DICoord &add) const
 {
 	shared_ptr<DgLocation> loc(idgg().makeLocation(add) ) ;
 
     // const DgGeoCoord* center  = idgg().geoRF().getAddress(*idgg().geoRF().convert(loc.get()));
 	vector<long double> returnval ;
-	DgLocVector locv;
+	DgLocVector locv(this->idgg());
 	this->calnei(add,locv);
 	long double minVal = LDBL_MAX ;
 	long double maxVal = 0; //加个大写避免与类中函数名minval重复 防止出现意外情况
@@ -193,7 +204,7 @@ vector<long double>  calDgg::calmaxmintotalcsd(const DgQ2DICoord& add) const
 
 	shared_ptr<DgLocation> loc( idgg().makeLocation(add) ) ;
 
-    const DgGeoCoord* center  = idgg().geoRF().getAddress(*idgg().geoRF().convert(loc.get()));
+    // const DgGeoCoord* center  = idgg().geoRF().getAddress(*idgg().geoRF().convert(loc.get()));
 
 	// 先求得格网本身的边界中点
 	DgPolygon verts_c; //rf是 georf
@@ -243,13 +254,40 @@ vector<long double>  calDgg::calmaxmintotalcsd(const DgQ2DICoord& add) const
     return returnval;
 
 }
+vector<DgQ2DICoord> calDgg::readadd(string path) const
+{
+	vector<DgQ2DICoord> add;
+	//先读取只包含编码的文档
+	// 打开文件
+	std::ifstream file(path);
+	// 检查文件是否成功打开
+	if (!file.is_open()) {
+		std::cout << "Failed to open file." << std::endl;
+		return vector<DgQ2DICoord>();
+	}
+	// 逐行读取文件内容
+	std::vector<int> nums;
+	std::string line;
+	while (std::getline(file, line)) {
+		// 将字符串转换为整数并存储在容器中
+		nums.push_back(std::stoull(line));
+	}
+
+	file.close();
+	//把编码转化为DgQ2DICoord
+	for(auto num : nums)
+	{
+		add.push_back(idgg().bndRF().addFromSeqNum(num)) ;
+	}
+    return add;
+}
 vector<long double> calDgg::calmaxmintotalangle(const DgQ2DICoord &add) const
 {
 	shared_ptr<DgLocation> loc(idgg().makeLocation(add) ) ;
 
-    const DgGeoCoord* center  = idgg().geoRF().getAddress(*idgg().geoRF().convert(loc.get()));
+    // const DgGeoCoord* center  = idgg().geoRF().getAddress(*idgg().geoRF().convert(loc.get()));
 	vector<long double> returnval ;
-	DgLocVector locv;
+	DgLocVector locv(this->idgg());
 	this->calnei(add,locv);
 	long double minVal = LDBL_MAX ;
 	long double maxVal = 0; //加个大写避免与类中函数名minval重复 防止出现意外情况
@@ -1073,6 +1111,237 @@ calDgg::calDgg(  const DgIDGGBase &idgg) : IDGG_(idgg)
 
 }
 
+/// @brief 
+/// @param outFileName  输出的文件名 
+/// @param outputDelimiter 输出所用的间隔符
+/// @param inFilepath 输入文件所在的路径 
+/// @param inAddType 输入的编码类型 见DGGRID 能够作为输入的编码
+/// @param outAddType 输出的编码类型 默认且必须是"Q2DI"
+/// @param suffix 输入文件的后缀名
+void calDgg::result2file(string outFileName, char outputDelimiter,string inFilepath, string inAddType,string outAddType,string suffix  ) const
+{
+        // shared_ptr<ofstream> pOutFile(new DgOutputStream(outFileName, "", DgBase::Fatal));
+        // ofstream& outFile = *pOutFile;
+		 std::ofstream outFile(outFileName); // 创建 ofstream 并打开文件
+		if (!outFile.is_open()) 
+		{ // 检查文件是否成功打开
+        	std::cerr << "Failed to open file!" <<outFileName<< std::endl;
+		}
+		//首先输入标题
+		const char* title = " name , area , per , zsc , disminmax ,disavg , angleminmax , angleavg , csdminmax , csdavg ";
+		outFile<<title<<endl;
+		//循环输入文件
+		vector <string> paths =this->getfilName(inFilepath,suffix);
+		for(auto path : paths)
+		{
+			cout<<path<<endl;
+			fs::path fspath(path);
+    		std::string filename = fspath.filename().string();
+			vector<DgQ2DICoord> adds =this->getQDIfromfile(path);
+			results resu =this->calonefile(adds);
+
+			outFile<<filename;
+			outFile<<outputDelimiter<<resu.area;
+			outFile<<outputDelimiter<<resu.per;
+			outFile<<outputDelimiter<<resu.zsc;
+
+			outFile<<outputDelimiter<<resu.disminmax;
+			outFile<<outputDelimiter<<resu.disavg;
+
+			outFile<<outputDelimiter<<resu.angleminmax;
+			outFile<<outputDelimiter<<resu.angleavg;
+
+			outFile<<outputDelimiter<<resu.csdminmax;
+			outFile<<outputDelimiter<<resu.csdavg;
+			outFile<<endl;
+
+
+		}
+		// vector<DgQ2DICoord> adds =getQDIfromfile(inFileName,inAddType,outAddType);
+
+		// calonefile(adds);
+
+   		outFile.close();
+
+}
+
+
+vector<DgQ2DICoord> calDgg::getQDIfromfile (string inFileName,    string inAddType ,string outAddType  )  const
+{
+	const DgIDGGBase&  dgg= this->idgg();
+		// set-up to convert to degrees
+	DgGeoSphDegRF::makeRF(dgg.geoRF(), dgg.geoRF().name() + "Deg");
+	// set-up the input reference frame
+	const char* calValstr = "test remainder,test ,";
+	bool inSeqNum = false;
+	const DgRFBase* pInRF = NULL;
+	if (inAddType == "GEO") pInRF = &dgg.geoRF();
+	else if (inAddType == "PROJTRI") pInRF = &dgg.projTriRF();
+	else if (inAddType == "VERTEX2DD") pInRF = &dgg.vertexRF();
+	else if (inAddType == "Q2DD") pInRF = &dgg.q2ddRF();
+	else if (inAddType == "INTERLEAVE") pInRF = &dgg.intRF();
+	else if (inAddType == "PLANE") pInRF = &dgg.planeRF();
+	else if (inAddType == "Q2DI") pInRF = &dgg;
+	else if (inAddType == "SEQNUM")
+	{
+		inSeqNum = true;
+		pInRF = &dgg;
+	}
+	const DgRFBase& inRF = *pInRF;
+
+	const DgRFBase& outRF =dgg;
+
+	// set the precision
+
+	// const_cast<DgRFBase&>(outRF).setPrecision(precision);
+
+	// now process the addresses in the input file
+
+	const int maxLine = 1000;
+	char buff[maxLine];
+
+	// dgcout << "transforming values..." << endl;
+
+	DgInputStream inFile(inFileName, "", DgBase::Fatal);
+
+	char delimStr[2];
+	char inputDelimiter = ' ';
+	delimStr[0] =inputDelimiter;
+	delimStr[1] = '\0';
+	vector<DgQ2DICoord> adds ;
+	// 跳过第一行 属于列名
+	inFile.getline(buff, maxLine);//一次读取一行
+	while (1)
+	{
+		// get the next line
+
+		inFile.getline(buff, maxLine);//一次读取一行
+		if (inFile.eof()) break;
+
+		// parse the address
+
+		DgLocation* loc = NULL;
+		if (inSeqNum)
+		{
+			char* snStr;
+			// 分割字符串函数
+			snStr = strtok(buff, delimStr);
+			unsigned long int sNum;
+			if (sscanf(snStr, "%lu", &sNum) != 1)
+			{
+				::report("doTransform(): invalid SEQNUM " + string(snStr),
+						DgBase::Fatal);
+			}
+			loc = static_cast<const DgIDGGBase&>(inRF).bndRF().locFromSeqNum(sNum);
+		}
+		else
+		{
+			loc = new DgLocation(inRF);
+			string snStr1 =string(buff);
+			loc->fromString(buff, inputDelimiter);
+		}
+		// convert the address
+		outRF.convert(loc);
+		const DgQ2DICoord add = static_cast<const DgAddress<DgQ2DICoord>*>(loc->address())->address();
+		adds.push_back(add);
+		delete loc;
+
+	}
+	inFile.close();
+
+	return adds;
+}
+vector<string> calDgg::getfilName(string inFilePath, string suffix) const
+{
+	vector<string> absfilenames;
+    DIR *dir = opendir(inFilePath.c_str());
+    if (dir)
+    {
+        struct dirent *entry;
+        while ((entry = readdir(dir)) != nullptr)
+        {
+            if (entry->d_type == DT_REG && std::string(entry->d_name).substr(std::string(entry->d_name).find_last_of(".") + 1) == suffix)
+            {
+				absfilenames.push_back(inFilePath + "/" + entry->d_name);
+				// string filename = string(path);
+                // std::cout << "Found CSV file: " << inFilePath << "/" << entry->d_name << std::endl;
+            }
+        }
+        closedir(dir);
+    }
+    else
+    {
+        std::cerr << "Could not open directory: " << inFilePath << std::endl;
+        return absfilenames;
+    }
+}
+long double calmean(vector<long double> vecs)
+{
+	long double sum = 0;
+	for (int i = 0; i < vecs.size(); i++) {
+        sum += vecs[i];
+    }
+ 	double mean = sum / vecs.size();
+	return mean;
+}
+results calDgg::calonefile(vector<DgQ2DICoord> adds,int ptsPerEdgeDensify) const
+{
+	results resu;
+
+	vector<  long double > areas;
+	vector<  long double > pers;
+	vector<  long double > zscs;
+
+	vector<  long double > disminmaxs;
+	vector<  long double > disavgs;
+
+	vector<  long double > angleminmaxs;
+	vector<  long double > angleavgs;
+
+	vector<  long double > csdminmaxs;
+	vector<  long double > csdavgs;
+
+	 for(auto add : adds)
+	 {
+		areas.push_back( this->calarea(add,ptsPerEdgeDensify));
+		pers.push_back(this->calper(add,ptsPerEdgeDensify));
+		zscs.push_back(this->calzsc(add,ptsPerEdgeDensify));
+		// cout<<"1"<<endl;
+
+		vector<long double> disvec = this->calmaxmintotaldis(add);
+		disminmaxs.push_back(disvec[0]);
+		disavgs.push_back(disvec[1]);
+		// cout<<"2"<<endl;
+		
+		vector<long double> anglevec = this->calmaxmintotalangle(add);
+		angleminmaxs.push_back(anglevec[0]);
+		angleavgs.push_back(anglevec[1]);
+		// cout<<"3"<<endl;
+
+		vector<long double> csdvec = this->calmaxmintotalangle(add);
+		csdminmaxs.push_back(csdvec[0]);
+		csdavgs.push_back(csdvec[1]);
+		// cout<<"4"<<endl;
+
+	 }
+
+	 resu.area = calmean(areas);
+	 resu.per = calmean(pers);
+	 resu.zsc = calmean(zscs);
+
+	 resu.angleminmax  = calmean(angleminmaxs);
+	 resu.angleavg  = calmean(angleavgs);
+
+	 resu.disminmax = calmean(disminmaxs);
+	 resu.disavg  = calmean(disavgs);
+
+	 resu.csdminmax  = calmean(csdminmaxs);
+	 resu.csdavg = calmean(csdavgs);
+
+
+    return resu;
+}
+
 void calDgg::setAddVertices(const DgQ2DICoord &add, DgPolygon &vec, int densify) const 
 {
     /*得到的直接是 Dggecoord*/
@@ -1081,3 +1350,16 @@ void calDgg::setAddVertices(const DgQ2DICoord &add, DgPolygon &vec, int densify)
 }
 
 // long double DgGeoCoord::geoPolyArea
+
+unsigned long long int calDgg::getseqnum(const DgLocation loc) const
+{
+    return static_cast<const DgIDGGBase&>(this->idgg()).bndRF().seqNum(loc);
+}
+
+DgQ2DICoord calDgg::locFromSeqNum(unsigned long long int sNum) const
+{
+	shared_ptr<DgLocation> loc (static_cast<const DgIDGGBase&>(this->idgg()).bndRF().locFromSeqNum(sNum));
+	const DgQ2DICoord add = static_cast<const DgAddress<DgQ2DICoord>*>(loc->address())->address();
+    return add;
+}
+ 
