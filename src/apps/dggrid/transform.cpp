@@ -201,7 +201,7 @@ void doTransform (TransformParam& dp)
 
    const int maxLine = 1000;
    char buff[maxLine];
-   const char* remainder;
+   const char* remainder;//除了编外意外的其它信息 存储在这里
 
    dgcout << "transforming values..." << endl;
 
@@ -222,7 +222,7 @@ void doTransform (TransformParam& dp)
    {
       // get the next line
 
-      inFile.getline(buff, maxLine);
+      inFile.getline(buff, maxLine);//一次读取一行
       if (inFile.eof()) break;
 
       // parse the address
@@ -231,6 +231,7 @@ void doTransform (TransformParam& dp)
       if (dp.inSeqNum)
       {
          char* snStr;
+         // 分割字符串函数
          snStr = strtok(buff, delimStr);
          unsigned long int sNum;
          if (sscanf(snStr, "%lu", &sNum) != 1)

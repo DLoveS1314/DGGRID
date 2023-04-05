@@ -87,7 +87,8 @@ template <class A, class D> class DgRF : public DgRFBase {
                                                                          const;
       virtual string toAddressString (const DgLocVector& locVec, char delimiter)
                                                                          const;
-
+        // 从字符串中得到想要的编码 并赋值给loc 所有的类内容相同 不同的是其内部实现
+        // str2add函数 
       virtual const char* fromString (DgLocation& loc, const char* str,
                                       char delimiter) const;
 

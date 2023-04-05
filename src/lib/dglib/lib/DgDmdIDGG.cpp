@@ -149,7 +149,7 @@ DgDmdIDGG::initialize (void)
 ////// NEEDS UPDATING 每一层参数计算
    gridStats_.setCellDistKM(tmpLen / pow(sqrt((long double) aperture()), res()));
 
-      // a = globeArea / (#cells - 2);
+      // a = globeArea / (#cells - 2); 总的地球面积 除以格网数量
       gridStats_.setCellAreaKM(DgGeoSphRF::totalAreaKM() / gridStats_.nCells());
 
    gridStats_.setCLS(2.0L * 2.0L * DgGeoSphRF::earthRadiusKM() *

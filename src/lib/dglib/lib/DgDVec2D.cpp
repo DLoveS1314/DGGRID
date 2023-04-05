@@ -58,11 +58,13 @@ DgDVec2D::fromString (const char* str, char delimiter)
    strcpy(tmpStr, str);
 
    char* tok;
-
+    //    strtok  用法是一次返回一个delimStr分割的字符串 第一次调用传入tmpStr 第二次使用strtok(NULL, delimStr)就可以得到
+    //下一个分割的字符串
    // get the x
 
    tok = strtok(tmpStr, delimStr);
    long double xIn;
+    //验证一下第一位是否是float 如果不是那就是错误的
    if (sscanf(tok, "%LF", &xIn) != 1)
    {
       ::report("DgDVec2D::fromString() invalid value in string " + string(tok),

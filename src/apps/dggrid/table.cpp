@@ -61,6 +61,8 @@ void doTable (MainParam& dp, DgGridPList& plist)
 
    const DgGridStats& gs0 = idggs->idggBase(0).gridStats();
    const DgGridStats& gsR = idggs->idggBase(numRes - 1).gridStats();
+
+   // 设置输出时所占位数
    int resWidth =  (int) resS.length();
    int nCellsWidth = max((int) dgg::util::addCommas(gsR.nCells()).length(),
                          (int) nCellsS.length()) + 1;

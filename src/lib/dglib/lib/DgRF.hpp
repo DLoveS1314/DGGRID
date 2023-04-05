@@ -304,6 +304,7 @@ template <class A, class D> const char*
 DgRF<A, D>::fromString (DgLocation& loc, const char* str, char delimiter) const
 {
    A add;
+   // str2add是一个纯虚函数 继承它的子类 都需要实现才行
    const char* tmp = str2add(&add, str, delimiter);
    if (add == undefAddress())
    {
