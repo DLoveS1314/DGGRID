@@ -45,8 +45,8 @@ DgOutNeighborsFile::insert (const DgIDGGBase& dgg, const DgLocation& center,
    unsigned long long int sn = dgg.bndRF().seqNum(center);
    *this << sn;
    for (int i = 0; i < vec.size(); i++)
-   {
-      *this << " " << dgg.bndRF().seqNum(vec[i]);
+   {//修改输出的间隔符 转为csv的逗号方便读取
+      *this << "," << dgg.bndRF().seqNum(vec[i]);
    }
 
    *this << endl;

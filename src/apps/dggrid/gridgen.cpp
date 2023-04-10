@@ -930,9 +930,9 @@ void outputCell (GridGenParam& dp, const DgIDGGSBase& dggs, const DgIDGGBase& dg
 
       ///// children/neighber output files /////
       if (dp.nbrOut) {
-
-         if (dp.gridTopo == Triangle)
-            ::report("Neighbors not implemented for Triangle grids", DgBase::Fatal);
+          //修改注释 添加三角形的面邻近 
+         // if (dp.gridTopo == Triangle)
+         //    ::report("Neighbors not implemented for Triangle grids", DgBase::Fatal);
 
          delete dp.nbrOut;
          dp.nbrOut = NULL;
@@ -1036,9 +1036,9 @@ void outputCell (GridGenParam& dp, const DgIDGGSBase& dggs, const DgIDGGBase& dg
    DgLocation ctrGeo = cell.node();
    //if (dp.nbrOut || dp.neighborOutType == "GDAL_COLLECTION")
    if (dp.neighborsOutType != "NONE") {
-
-      if (dp.gridTopo == Triangle)
-         ::report("Neighbors not implemented for Triangle grids", DgBase::Fatal);
+      //修改注释 添加三角形的面邻近 
+      // if (dp.gridTopo == Triangle)
+      //    ::report("Neighbors not implemented for Triangle grids", DgBase::Fatal);
 
       dgg.setNeighbors(add2D, neighbors);
       if (dp.nbrOut) dp.nbrOut->insert(dgg, add2D, neighbors);
@@ -1198,12 +1198,17 @@ void genGrid (GridGenParam& dp)
 
    ///// PlanetRisk /////
    dp.nbrOut = NULL;
-   if (dp.neighborsOutType == "TEXT")
-      dp.nbrOut = new DgOutNeighborsFile(neighborsOutFileName, "nbr");
+   string suffix ="";   // 由于有默认值   suffix 必须显式指定
+   if (dp.neighborsOutType == "TEXT") //不添加 后缀 方便后续程序中判断是否存在文件
+      // dp.nbrOut = new DgOutNeighborsFile(neighborsOutFileName, "nbr");
+   
+      
+      dp.nbrOut = new DgOutNeighborsFile(neighborsOutFileName,suffix );
 
    dp.chdOut = NULL;
    if (dp.childrenOutType == "TEXT")
-      dp.chdOut = new DgOutChildrenFile(childrenOutFileName, "chd");
+      // dp.chdOut = new DgOutChildrenFile(childrenOutFileName, "chd");
+      dp.chdOut = new DgOutChildrenFile(childrenOutFileName,suffix );
 
    ////// do applicable clipping mode /////
    // 提供seqnum 生成格网

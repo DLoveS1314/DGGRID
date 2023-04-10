@@ -13,19 +13,20 @@
 dggrid_operation GENERATE_GRID
 
 # specify the DGG
-dggs_type ISEA3H
-dggs_res_spec 5
+dggs_type FULLER4D
+dggs_res_spec 4
 
 # control the generation
 clip_subset_type WHOLE_EARTH
 geodetic_densify 0.0
-
+dggs_vert0_lon 0.0 
+dggs_vert0_lat  90.0 
 # specify the output
 cell_output_type KML
-cell_output_file_name outputfiles/isea3h5
+cell_output_file_name outputfiles/FULLER4D3
 point_output_type KML
-point_output_file_name outputfiles/isea3h5p
+point_output_file_name outputfiles/FULLER4D3p
 kml_default_width 2
 kml_default_color ff0000ff
-densification 3
-precision 5
+densification 0
+precision 7

@@ -1,0 +1,6 @@
+dggrid_operation GENERATE_GRID
+dggs_type ISEA4H
+dggs_res_spec 3
+clip_subset_type WHOLE_EARTH
+children_output_type TEXT
+children_output_file_name /home/dls/data/openmmlab/DGGRID/examples/genChildren/outputfiles/children3_H.csv

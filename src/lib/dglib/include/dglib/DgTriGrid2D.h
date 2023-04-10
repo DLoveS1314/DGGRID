@@ -50,7 +50,7 @@ class DgTriGrid2D : public DgDiscRF2D {
            { DgDiscRF2D::operator=(grd); return *this; }
 
       virtual long long int dist (const DgIVec2D& add1, const DgIVec2D& add2) const;
-
+      // 奇数列是上三角形 偶数列是下三角形
       static bool isUp (const DgIVec2D& add) { return !(add.j() % 2); }
 
    protected:

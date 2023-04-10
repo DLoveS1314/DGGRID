@@ -11,22 +11,22 @@
 dggrid_operation GENERATE_GRID
 
 # specify the DGG
-dggs_type ISEA4H
-dggs_res_spec 4
+dggs_type ISEA4T
+dggs_res_spec 3
 
 # control the generation
 clip_subset_type WHOLE_EARTH
 geodetic_densify 0.0
 
-# specify the output
+# specify the outputd
 
 neighbor_output_type TEXT
-neighbor_output_file_name /home/dls/data/openmmlab/DGGRID/src/apps/dggrid/outputfiles/neighbors
-children_output_type TEXT
-children_output_file_name /home/dls/data/openmmlab/DGGRID/src/apps/dggrid/outputfiles/children
-#cell_output_file_name  None
-#point_output_type KML
-#point_output_file_name outputfiles/dmd_4_point
- 
+
+neighbor_output_file_name outputfiles/trineighbors_3.csv
+
+point_output_type KML
+point_output_file_name outputfiles/tri_3_point
+
+
 densification 0
-precision 6
+precision 7

@@ -152,7 +152,8 @@ class DgDiscRF : public DgRF<A, long long int> {
 
       virtual void setNeighbors (const A& add, DgLocVector& vec) const
                { vec.clearAddress(); this->convert(vec); setAddNeighbors(add, vec); }
-
+      // set 和make的区别就是 一个需要传入DgLocVector 一个不需要 但是返回的是指针 
+      // 这个指针如何处理需要删除？可以返回局部指针 但不能返回局部变量的指针 在外部要记得删除
       virtual DgLocVector* makeNeighbors (const DgLocation& loc) const
                { DgLocVector* vec = new DgLocVector(*this);
                  setNeighbors(loc, *vec);  return vec; }

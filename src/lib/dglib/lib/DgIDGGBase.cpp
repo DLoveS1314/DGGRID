@@ -1092,9 +1092,10 @@ vector<DgQ2DICoord> DgIDGGBase::triedgenei(const DgQ2DICoord &add1) const
 		else //下三角形
 		{
 			//面内下三角形的三个边邻近单元 
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 1, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 0, add1.coord().j() - 1)));
+			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 1, add1.coord().j() + 1)));
+		
 		}
 	}
 	//第0行 的下三角形 且不是第0列的下三角形 下三角形的第0列是跨面的特殊处理 
@@ -1103,9 +1104,10 @@ vector<DgQ2DICoord> DgIDGGBase::triedgenei(const DgQ2DICoord &add1) const
 	
 	{
 		//面内下三角形的三个边邻近单元 
-		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 1, add1.coord().j() + 1)));
 		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 0, add1.coord().j() - 1)));
+		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 1, add1.coord().j() + 1)));
+
 	}
 	//第大行的上三角形 且不是最大列的上三角形 上三角形的最大列是跨面的特殊处理 上三角形列不会是第0列
 	else if(add1.coord().i() == maxI && add1.coord().j() % 2 == 1 && add1.coord().j() != maxJ)
@@ -1115,8 +1117,10 @@ vector<DgQ2DICoord> DgIDGGBase::triedgenei(const DgQ2DICoord &add1) const
 		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 1, add1.coord().j() - 1)));
 	}
+
 	//跨面的情况
-	// 行为0  最小行 列不是最大列的奇数列（上三角形）  跨一个面
+
+	// 行为0  最小行 列不是最大列的奇数列（上三角形）  跨一个面 上三角形
 	else if(add1.coord().i() == 0 && add1.coord().j() % 2 == 1 && add1.coord().j() != maxJ)
 	{
 		if(add1.quadNum() == 1)
@@ -1146,7 +1150,8 @@ vector<DgQ2DICoord> DgIDGGBase::triedgenei(const DgQ2DICoord &add1) const
 		}
 
 	}
-	// 行为0 最小行 列是最大列    跨两个面 
+	
+	// 行为0 最小行 列是最大列    跨两个面  上三角形
 	else if(add1.coord().i() == 0 && add1.coord().j() % 2 == 1 && add1.coord().j() == maxJ)
 	{
 		if(add1.quadNum() == 1)
@@ -1170,7 +1175,7 @@ vector<DgQ2DICoord> DgIDGGBase::triedgenei(const DgQ2DICoord &add1) const
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 4, DgIVec2D( 0, maxJ)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 1, DgIVec2D(0, maxJ)));
 		}
-		else if(add1.quadNum() >= 6 && add1.quadNum() < 10)//代码给的有错误 10的情况不一样
+		else if(add1.quadNum() >= 6 && add1.quadNum() < 10)//源程序代码给的有错误 10的情况不一样
 		{
 			//跨面三角形邻近查找
 			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() - 1)));
@@ -1186,131 +1191,115 @@ vector<DgQ2DICoord> DgIDGGBase::triedgenei(const DgQ2DICoord &add1) const
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 5, DgIVec2D( maxI, maxJ - 1)));
 
 		}
+
 	}
-	// 最大行 不等于0的偶数列 跨一个面 
+	// 最大行 不等于0的偶数列 跨一个面 下三角形 进行修改 让下三角形从顶开始逆时针输出
 	else if(add1.coord().i() == maxI && add1.coord().j() % 2 == 0 && add1.coord().j() != 0)
 	{
+		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
+		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 0, add1.coord().j() - 1)));
 		if(add1.quadNum() >= 1 && add1.quadNum() <= 5)
 		{
-			//跨面下三角形的三个边邻近单元 
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 5, DgIVec2D(0, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 0, add1.coord().j() - 1)));
 		}
 		else if(add1.quadNum() >= 6 && add1.quadNum() < 10)
 		{
-			//跨面下三角形的三个边邻近单元 
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 1, DgIVec2D(maxJ / 2 - add1.coord().j() / 2, 0)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 0, add1.coord().j() - 1)));
 		}
 		else if(add1.quadNum() == 10)
 		{
-			//跨面下三角形的三个边邻近单元 
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 4, DgIVec2D(maxJ / 2 - add1.coord().j() / 2, 0)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 0, add1.coord().j() - 1)));
 		}
 	}
-	// 最大行 等于0的偶数列 （最小列）  跨两个面
+	// 最大行 等于0的偶数列 （最小列）  跨两个面 下三角形
 	else if(add1.coord().i() == maxI && add1.coord().j() == 0)
 	{
+		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
+
 		if(add1.quadNum() == 1)
 		{
 			//跨面下三角形的三个边邻近单元 
-			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 5, DgIVec2D(0, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 9 , DgIVec2D(maxI, maxJ)));
+			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 5, DgIVec2D(0, add1.coord().j() + 1)));
 		}
 		else if(add1.quadNum() > 1 && add1.quadNum() <= 5)
 		{
 			//跨面下三角形的三个边邻近单元 
-			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 5, DgIVec2D(0, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
+
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 4, DgIVec2D(maxI, maxJ)));
+			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 5, DgIVec2D(0, add1.coord().j() + 1)));
 		}
 		else if(add1.quadNum() == 6)
 		{
 			//跨面下三角形的三个边邻近单元 
-			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 1, DgIVec2D(maxI, 0)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 4, DgIVec2D(maxI, 0)));
+			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 1, DgIVec2D(maxI, 0)));
 		}
 		else if(add1.quadNum() > 6 && add1.quadNum() < 10)
 		{
 			//跨面下三角形的三个边邻近单元 
-			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 1, DgIVec2D(maxI, 0)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 1, DgIVec2D(maxI, 0)));
+			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 1, DgIVec2D(maxI, 0)));
 		}
 		else if(add1.quadNum() == 10)
 		{
 			//跨面下三角形的三个边邻近单元 
-			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 4, DgIVec2D(maxI, 0)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 1, DgIVec2D(maxI, 0)));
+			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 4, DgIVec2D(maxI, 0)));
 		}
 	}
+	
 	// 最小列 行不是最大行 下三角形 跨一面
 	else if( add1.coord().j() == 0 &&  add1.coord().i() != maxI)
 	{
+		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
+
 		if(add1.quadNum() == 1)
 		{
 			 
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 1, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 9, DgIVec2D(add1.coord().i(), maxJ)));
 		}
 		else if(add1.quadNum() > 1 && add1.quadNum() <= 5)
 		{
-			  
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 1, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 4, DgIVec2D(add1.coord().i(), maxJ)));
 		}
 		else if(add1.quadNum() == 6)
 		{
-		 
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 1, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 4, DgIVec2D(maxI, (maxI - add1.coord().i()) * 2)));
 		}
 		else if(add1.quadNum() > 6 && add1.quadNum() <= 10)
 		{
-			 
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 1, add1.coord().j() + 1)));
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 1, DgIVec2D(maxI, (maxI - add1.coord().i()) * 2)));
 		}
+		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 1, add1.coord().j() + 1)));
 	}
-	// 最大列 行不是最小行 跨一个面 
+	// 最大列 行不是最小行 跨一个面  上三角形
 	else if( add1.coord().j() == maxJ &&  add1.coord().i() != 0)
 	{
+		neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() - 1)));
 		if(add1.quadNum() >= 1 && add1.quadNum() < 5)
 		{
 			//跨面上三角形的三个边邻近单元
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() - 1)));
+			
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() + 1, DgIVec2D(0, (maxI - add1.coord().i()) * 2 + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 1, add1.coord().j() - 1)));
 		}
 		else if(add1.quadNum() == 5)
 		{
 			//跨面上三角形的三个边邻近单元
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() - 1)));
+			
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 4, DgIVec2D(0, (maxI - add1.coord().i()) * 2 + 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 1, add1.coord().j() - 1)));
 		}
 		else if(add1.quadNum() >= 6 && add1.quadNum() < 10)
 		{
 			//跨面上三角形的三个边邻近单元
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() - 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 4, DgIVec2D(add1.coord().i(), 0)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 1, add1.coord().j() - 1)));
 		}
 		else if(add1.quadNum() == 10)
 		{
 			//跨面上三角形的三个边邻近单元
-			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() + 0, add1.coord().j() - 1)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum() - 9, DgIVec2D(add1.coord().i(), 0)));
 			neiadd.push_back(DgQ2DICoord(add1.quadNum(), DgIVec2D(add1.coord().i() - 1, add1.coord().j() - 1)));
 		}
@@ -1323,38 +1312,23 @@ vector<DgQ2DICoord> DgIDGGBase::trisecnei(const DgQ2DICoord &add1) const
 {
 	vector<DgQ2DICoord> firstnei = this->triedgenei(add1);
 	std::vector<DgQ2DICoord> secnei_vec;
-
-
-
-	cout<<add1 <<" ,"<<bndRF().seqNum( * this->makeLocation(add1))<< endl;
-	
 	secnei_vec.insert(secnei_vec.end(), firstnei.begin(), firstnei.end());//首先加入一阶邻近的编码
 	// secnei_vec.assign(firstnei.begin(), firstnei.end());//讲内容复制到vec，但是会删除以前的内容
 	for (const auto& ele : firstnei) 
 	{
-		// 把插入放在内循环 能够保证 输出的顺序是按照一阶编码的顺序来的
-		// 如果放在外面则按照所有的大小顺序进行排列
-		std::set<DgQ2DICoord> secnei_set;
-		secnei_set.insert(add1);//先加入add和一阶邻近 然后记得删除掉
-		cout<<"FIRST LOOP"<<ele <<" ,"<<bndRF().seqNum( * this->makeLocation(ele))<< endl;
-
 		 vector<DgQ2DICoord> secneiadd  = this->triedgenei(ele);
 		 for(const auto& secele : secneiadd)
 		 {
-			cout<<secele <<" ,"<<bndRF().seqNum( * this->makeLocation(secele))<< endl;
-
-			secnei_set.insert(secele);
-
+			 if (secele == add1)
+			 {
+				continue;
+			 }
+			else
+			{
+				secnei_vec.push_back(secele);
+			}
 		 }
-		auto it = secnei_set.find(add1);  // 找到元素 x 的迭代器
-		if (it != secnei_set.end()) {
-			secnei_set.erase(it);      // 删除元素 x
-		}
-		// 把数据传回vec 个数应该是9个 
-		secnei_vec.insert(secnei_vec.end(), secnei_set.begin(), secnei_set.end());
 	}
-
-
 	// secnei_vec.assign(secnei_set.begin(), secnei_set.end());
 	return secnei_vec;
 }

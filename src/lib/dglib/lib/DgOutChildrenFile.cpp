@@ -56,7 +56,7 @@ DgOutChildrenFile::insert (const DgIDGGBase& dgg, const DgLocation& center,
    for (int i = 0; i < vec.size(); i++) {
       DgLocation tmpLoc(vec[i]);
       dggr.convert(&tmpLoc);
-      *this << " " << dggr.bndRF().seqNum(tmpLoc);
+      *this << "," << dggr.bndRF().seqNum(tmpLoc);
    }
 
    *this << endl;

@@ -152,9 +152,12 @@ class DgIDGGBase : public DgDiscRF<DgQ2DICoord, DgGeoCoord, long double> {
       static const DgQuadEdgeCells& edgeTable (int quadNum)
                        { return edgeTable_[quadNum]; }
 
-//  自建函数 生成菱形四邻域和八邻域
+   // 自建函数 生成菱形四邻域和八邻域
     vector<DgQ2DICoord> fourneicell(DgQ2DICoord& add1 );
     vector<DgQ2DICoord> neicell(const DgQ2DICoord& add1 ) const;
+    vector<DgQ2DICoord> triedgenei(const DgQ2DICoord& add1 ) const;
+   // 计算三角形的二阶边邻近
+     vector<DgQ2DICoord> trisecnei(const DgQ2DICoord& add1 ) const;
    protected:
 
       DgIDGGBase (const DgIDGGSBase* dggs, const DgGeoSphRF& geoRFIn,

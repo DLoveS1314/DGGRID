@@ -27,6 +27,6 @@ input_address_type GEO
 input_delimiter " "
 
 # specify the output
-output_file_name /home/dls/data/openmmlab/DGGRID/examples/transform/outputfiles/cities3_geo2seq.txt
-output_address_type SEQNUM
+output_file_name /home/dls/data/openmmlab/DGGRID/examples/transform/outputfiles/cities3_interleave.txt
+output_address_type INTERLEAVE
 output_delimiter ","

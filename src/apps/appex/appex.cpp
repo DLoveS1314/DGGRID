@@ -29,6 +29,7 @@ using namespace std;
 
 #include <dglib/DgIDGGS4H.h>
 #include <dglib/DgIDGGS4D.h>
+#include <dglib/DgIDGGS4T.h>
 #include <dglib/DgIDGG.h>
 #include "dglib/DgBoundedIDGG.h"
 
@@ -54,17 +55,24 @@ int main (int, char**)
 
    // all DGGS's must be created using a factory makeRF method
    // the DGGS is memory managed by the DgRFNetwork
-   const DgIDGGS4D * idggsDPtr = DgIDGGS4D::makeRF(net0, geoRF, vert0, azimuth, 10,"ISEA4D_D8","ISEA",dgg::topo::D4);
-//    const DgIDGGS4H* idggsPtr = DgIDGGS4H::makeRF(net0, geoRF, vert0, azimuth, 10);
-//   const DgIDGGS4H& idggs = *idggsPtr;
-    const DgIDGGS4D& idggs = *idggsDPtr;
+   // const DgIDGGS4D * idggsDPtr = DgIDGGS4D::makeRF(net0, geoRF, vert0, azimuth, 10,"ISEA4D_D8","ISEA",dgg::topo::D4);
+   const DgIDGGS4T * idggsTPtr = DgIDGGS4T::makeRF(net0, geoRF, vert0, azimuth, 10 );
+
+   const DgIDGGS4H* idggsPtrH = DgIDGGS4H::makeRF(net0, geoRF, vert0, azimuth, 10);
+  const DgIDGGS4H& idggsH = *idggsPtrH;
+   const DgIDGG& dggH = idggsH.idgg(3);
+   dggH.setNeighbors
+
+   //  const DgIDGGS4D& idggs = *idggsDPtr;
+    const DgIDGGS4T& idggs = *idggsTPtr;
+
 
    // get the resolution 7 dgg from the dggs
    const DgIDGG& dgg = idggs.idgg(3);
    cout << dgg.gridStats() << endl;
 
-  DgQuadEdgeCells edge = dgg.edgeTable(1);
-    cout << edge.isType0()<<edge.loneVert()<<edge.quadNum()<<edge.rightQuad()<<edge.upQuad();
+//   DgQuadEdgeCells edge = dgg.edgeTable(1);
+//     cout << edge.isType0()<<edge.loneVert()<<edge.quadNum()<<edge.rightQuad()<<edge.upQuad();
 //    cout<< dgg.grid2DS().grids()[res()];
 
    //////// now use the DGG /////////
@@ -79,9 +87,15 @@ int main (int, char**)
    cout << "the point " << *thePt << endl;
 
     const DgBoundedIDGG  loc1 = static_cast<const DgIDGG&>(dgg).bndRF();
-    DgLocation* loc2 =  loc1.locFromSeqNum(2);
+    DgLocation* loc2 =  loc1.locFromSeqNum(1);
     cout << "the loc2 " << *loc2 << endl;
-
+    const DgQ2DICoord * add = dgg.getAddress( *loc2);
+    auto adds = dgg.trisecnei(*add);
+    for(auto add_loop : adds)
+    {
+      cout<<add_loop<<" ,"<<loc1.seqNum(* dgg.makeLocation(add_loop))<< endl;
+    }
+   exit(0);
    // converting the point location to the dgg RF determines which cell it's in
 //   dgg.convert(thePt);
 //   cout << "* lies in cell " << *thePt << endl;
