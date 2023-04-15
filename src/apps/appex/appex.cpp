@@ -61,7 +61,6 @@ int main (int, char**)
    const DgIDGGS4H* idggsPtrH = DgIDGGS4H::makeRF(net0, geoRF, vert0, azimuth, 10);
   const DgIDGGS4H& idggsH = *idggsPtrH;
    const DgIDGG& dggH = idggsH.idgg(3);
-   dggH.setNeighbors
 
    //  const DgIDGGS4D& idggs = *idggsDPtr;
     const DgIDGGS4T& idggs = *idggsTPtr;

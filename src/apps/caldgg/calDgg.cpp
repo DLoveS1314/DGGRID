@@ -13,9 +13,12 @@
 #include <sstream>
 #include <string>
 #include <dirent.h>
-#include<filesystem>
-namespace fs = std::filesystem;
+#include <chrono>
+#include <omp.h>
+
+
 bool calDgg::useearthRadius = true;
+string getbasename(string filename);
 long double calDgg::calarea(const DgQ2DICoord &add, int ptsPerEdgeDensify) const
 {
     // cout<<"res "<<idgg().res()<<endl;
@@ -76,6 +79,21 @@ long double calDgg::calzsc(const DgQ2DICoord &add, int ptsPerEdgeDensify) const
 	}
 	double const pi = 3.141592653589793238;
 	long double sqrtdata = 4*pi*area -area*area/r2 ; //参考罗师姐论文
+	// 分子
+	long double Numerator =  sqrt(sqrtdata);
+	
+	long double zsc =  Numerator/per;
+   	return zsc;
+}
+
+long double calDgg::calzsc(const double area, const double per) const
+{
+	double r2 =1.0;
+	if(calDgg::useearthRadius)
+	{
+		r2=DgGeoSphRF::earthRadiusKM()*DgGeoSphRF::earthRadiusKM() ;
+	}
+	long double sqrtdata = 4*M_PI*area -area*area/r2 ; //参考罗师姐论文
 	// 分子
 	long double Numerator =  sqrt(sqrtdata);
 	
@@ -163,7 +181,7 @@ vector<long double> calDgg::calmaxmintotaldis(const DgQ2DICoord &add) const
     // const DgGeoCoord* center  = idgg().geoRF().getAddress(*idgg().geoRF().convert(loc.get()));
 	vector<long double> returnval ;
 	DgLocVector locv(this->idgg());
-	this->calnei(add,locv);
+	this->calnei(add,locv);//不需要重新排序 
 	long double minVal = LDBL_MAX ;
 	long double maxVal = 0; //加个大写避免与类中函数名minval重复 防止出现意外情况
 	long double totalval = 0;
@@ -254,6 +272,58 @@ vector<long double>  calDgg::calmaxmintotalcsd(const DgQ2DICoord& add) const
     return returnval;
 
 }
+
+ 
+long double calDgg::calAzimuth(const GeoCoord &pt1, const GeoCoord &pt2) const
+{
+	long double az;
+	az=atan2l(cosl(pt2.lat)*sinl(pt2.lon-pt1.lon), cosl(pt1.lat)*sinl(pt2.lat)-
+		sinl(pt1.lat)*cosl(pt2.lat)*cosl(pt2.lon-pt1.lon));
+	az=az+M_PI;//转为0~360度
+	return az ;
+}
+
+long double calDgg::calAzimuth(const DgGeoCoord &pt1, const DgGeoCoord &pt2) const
+{   
+	// 计算p2为终点 的方位角
+   	long double az;
+	az=atan2l(cosl(pt2.lat())*sinl(pt2.lon()-pt1.lon()), cosl(pt1.lat())*sinl(pt2.lat())-
+		sinl(pt1.lat())*cosl(pt2.lat())*cosl(pt2.lon()-pt1.lon()));
+	az=az+M_PI;//转为0~360度
+	return az ;
+}
+// // 自定义结构体，用于保存double类型的值和对应的索引
+// struct IndexedValue {
+//     long double value;
+//     int index;
+// };
+
+// // 比较函数，用于std::sort排序时按value从小到大排序
+// bool cmp(const IndexedValue &a, const IndexedValue &b) {
+//     return a.value < b.value;
+// }
+
+vector<long double > calDgg::sortByAzimuth(const DgQ2DICoord& add,const DgLocVector locs) const
+{
+	// 先计算方位角
+	vector<long double > azi;
+	// vector< IndexedValue > azi( locs.size());
+	DgGeoCoord add_c = this->getGeocoord(add);
+	// for (int i = 0; i < locs.size(); i++)
+	// {
+	// 	DgGeoCoord add_e = this->getGeocoord( *idgg().getAddress(locs[i]));
+	// 	azi[i].value = this->calAzimuth(add_c,add_e);
+	// 	azi[i].index=i;
+	// }
+		for (int i = 0; i < locs.size(); i++)
+	{
+		DgGeoCoord add_e = this->getGeocoord( *idgg().getAddress(locs[i]));
+		azi.push_back(this->calAzimuth(add_c,add_e)) ;
+	} 
+	sort(azi.begin(), azi.end());//默认升序排列 必须从小到大排序 通过方位角计算的夹角才是正确的
+    return azi;
+}
+
 vector<DgQ2DICoord> calDgg::readadd(string path) const
 {
 	vector<DgQ2DICoord> add;
@@ -281,6 +351,7 @@ vector<DgQ2DICoord> calDgg::readadd(string path) const
 	}
     return add;
 }
+
 vector<long double> calDgg::calmaxmintotalangle(const DgQ2DICoord &add) const
 {
 	shared_ptr<DgLocation> loc(idgg().makeLocation(add) ) ;
@@ -289,25 +360,38 @@ vector<long double> calDgg::calmaxmintotalangle(const DgQ2DICoord &add) const
 	vector<long double> returnval ;
 	DgLocVector locv(this->idgg());
 	this->calnei(add,locv);
+	//三角形的邻近顺序不固定怎么办 只能先算方位角 然后按照方位角排序
+	vector<long double> azi = this->sortByAzimuth(add,locv);
 	long double minVal = LDBL_MAX ;
 	long double maxVal = 0; //加个大写避免与类中函数名minval重复 防止出现意外情况
 	long double totalval = 0;
-
-	// do each point
-    for (int i = 0; i < locv.size(); i++)
+	long double angle =0;
+	// do each point  通过方位角计算夹角最后一个夹角单独计算
+    for (int i = 0; i < azi.size()-1; i++)
     {
-		const DgQ2DICoord& add1 = *idgg().getAddress(locv[i]);
-		const DgQ2DICoord& add2 = *idgg().getAddress(locv[ (i+1)% locv.size() ] );//实现roll循环
-
-		long double angle = this->calangle(add,add1,add2);
-
+		 
+		angle = azi[i+1]-azi[i];
+		if (angle>M_PI) //防止钝角出现 虽然应该不可能
+		{
+			angle =M_2_PI- angle;
+		}
        	totalval+=angle;
 		minVal =this->minval(minVal,angle);
 		maxVal =  this->maxval(maxVal,angle);
-
     }
+	// 最后一个角一般是钝角
+	angle = azi[azi.size()-1]-azi[0];//一般是钝角
+	if (angle>M_PI) //防止钝角出现 虽然应该不可能
+	{
+		angle =M_2_PI- angle;
+	}
+	totalval+=angle;
+	minVal =this->minval(minVal,angle);
+	maxVal =  this->maxval(maxVal,angle);
+
 	long double max_min_ratio = maxVal/minVal;
 	long double mean = totalval/locv.size();
+
 	returnval.push_back(max_min_ratio);
 	returnval.push_back(mean);
 	// returnval.push_back(maxval);
@@ -349,7 +433,7 @@ DgGeoCoord calDgg::calmidpoint(const DgQ2DICoord& add,const DgQ2DICoord& add1 ) 
 DgGeoCoord calDgg::calmidpoint(const DgGeoCoord &add, const DgGeoCoord &add1) const
 {
 	DgGeoCoord midpoint =   DgGeoSphRF::midPoint(add, add1); 
-    return DgGeoCoord();
+    return midpoint;
 }
 
 DgGeoCoord calDgg::calintersect(const GeoCoord &sv11, const GeoCoord &sv12, const GeoCoord &sv21, const GeoCoord &sv22, int sign) const
@@ -459,12 +543,12 @@ DgGeoCoord calDgg::calintersect(const GeoCoord &sv11, const GeoCoord &sv12, cons
 
 DgGeoCoord calDgg::calintersect(const DgGeoCoord &g11, const DgGeoCoord &g12, const DgGeoCoord &g21, const DgGeoCoord &g22, int sign) const
 {
-   GeoCoord sv11, sv12, sv21,sv22;
-   sv11.lon = g11.lon(); sv11.lat = g11.lat();
-   sv12.lon = g12.lon(); sv12.lat = g12.lat();
-   sv21.lon = g21.lon(); sv21.lat = g21.lat();
+//    GeoCoord sv11, sv12, sv21,sv22;
+//    sv11.lon = g11.lon(); sv11.lat = g11.lat();
+//    sv12.lon = g12.lon(); sv12.lat = g12.lat();
+//    sv21.lon = g21.lon(); sv21.lat = g21.lat();
 
-   sv22.lon = g22.lon(); sv22.lat = g22.lat();
+//    sv22.lon = g22.lon(); sv22.lat = g22.lat();
     return DgGeoCoord();
 }
 
@@ -473,10 +557,12 @@ DgGeoCoord calDgg::calintersect(const DgGeoCoord &g11, const DgGeoCoord &g12, co
 /// @param vec saved structure 保存生成的邻域编码 编码是QIj 的location 
 void calDgg::calnei(const DgQ2DICoord &add, DgLocVector &vec) const
 {
-
-    // //重写了 DgDiscRF setAddNeighbors
+	//三角形的邻近顺序不是按照逆时针顺序来的一定谨记！
+	// 直接使用dggride的源程序 这个里面 菱形经过了特殊处理 去 除了九邻近，和七邻近 都补充为了八邻近
+	// 三角形 输出的是九邻近 六边形输出的是六邻近或者五邻近， 按照卷积核的大小输出来处理
     //DgLocVector在 DgDiscRF setNeighbors 已经转化为了DGIDGG空间 也就是Q i j空间
-   if (this->idgg().gridTopo()== Diamond)
+   if (this->idgg().gridTopo()== Diamond) 
+   //菱形的在源程序里菱形经过了特殊处理 去 除了九邻近，和七邻近 只包含了八邻近 所以不能使用 这里重新写一下
    {
        if (this->idgg().gridMetric() == D4)//现在不存在D8的菱形 所以只能D4菱形 也就是只能边临近和角临近选择一样
        {
@@ -489,14 +575,19 @@ void calDgg::calnei(const DgQ2DICoord &add, DgLocVector &vec) const
    }
    else
    {
-    dgcerr<<"setAddNeighbors "<<this->idgg().gridTopo()<< " not yet implemented"<<endl;
+		idgg().setNeighbors(add,vec);	
    }
+//    else
+//    {
+//     dgcerr<<"setAddNeighbors "<<this->idgg().gridTopo()<< " not yet implemented"<<endl;
+//    }
 }
 
 
 long double calDgg::calangle(const DgQ2DICoord &center, const DgQ2DICoord &add1, const DgQ2DICoord &add2) const
 {
     // 改编 自DgGeoCoord::geoTriArea 返回的是弧度 
+	//  也可以计算方位角 然后返回锐角
     DgGeoCoord centerg = this->getGeocoord(center);
     DgGeoCoord addg1 = this->getGeocoord(add1);
     DgGeoCoord addg2 = this->getGeocoord(add2);
@@ -518,7 +609,7 @@ long double calDgg::calangle(const DgQ2DICoord &center, const DgQ2DICoord &add1,
 
    long double bigA = 2.0L * atanl(k / sinsa);
 
-    long double l1[2],l2[2],l3[2],edges[2];
+    // long double l1[2],l2[2],l3[2],edges[2];
     // cout<<"夹角"<<bigA<<endl;
 
 	// 经过测试两个结果相同
@@ -538,63 +629,52 @@ long double calDgg::calangle(const DgQ2DICoord &center, const DgQ2DICoord &add1,
 }
 vector<DgQ2DICoord> calDgg::edgecell(const DgQ2DICoord &add) const
 	{
-		// 改写自 DgIDGGBase::setAddNeighbors 只能处理菱形和六边形 三角形不可以
-		// DGGRIDv7.7 currently only supports neighbors for hexagon and diamond
-		// grids (not triangle grids).
-
-		// DgLocVector vec;
-		// vec.clearAddress();
-		vector<DgQ2DICoord> vec;
-		// //重写了 DgDiscRF setAddNeighbors
-		//DgLocVector在 DgDiscRF setNeighbors 已经转化为了DGIDGG空间 也就是Q i j
-		//空的vector d但是 参考系变成了grid2D() 先求在一个面片里的行列号 边界处有错误的话 在后面改写
-		DgLocVector ngh2d(idgg().grid2D());
-		idgg().grid2D().setAddNeighbors(add.coord(), ngh2d);
-		//cout << " >> DgIDGGBase::setAddNeighbors center: " << add << endl;
-		//cout << "  ngh2d: " << ngh2d << endl;
-		//cout << " isCongruent: " << (isCongruent() ? "yes" : "no");
-
-		int q = add.quadNum();
-		DgLocVector ngh2dNoDup(idgg());//开始处理跨面
-		DgIVec2D c;
-		for (int i = 0; i < ngh2d.size(); i++)
+		// 改写自 DgIDGGBase::setAddNeighbors 只能处理菱形和六边形 三角形不可以 所以增加一个if 
+		if (this->idgg().gridTopo()== Triangle)
 		{
-			DgQ2DICoord c2di(q, *idgg().grid2D().getAddress(ngh2d[i])); //这个时候是有错误的 因为他包含了边界点
-	//cout << "*** i: " << i << " " << c2di;
-			const DgBoundedIDGG& bndRF =idgg().bndRF();
-			c2di = bndRF.q2dixToQ2di(c2di);//纠正错误的边界编码
-	//cout << " -> " << c2di << endl;
-
-			// check for duplicates
-			bool keeper = true;
-			if (!idgg().isCongruent() && add.coord() == DgIVec2D(0, 0))
+				vector <DgQ2DICoord> coords = this->idgg().triedgenei(add);
+				return  coords;
+		}
+		else
+		{	
+			vector<DgQ2DICoord> vec;
+			// //重写了 DgDiscRF setAddNeighbors
+			//DgLocVector在 DgDiscRF setNeighbors 已经转化为了DGIDGG空间 也就是Q i j
+			//空的vector d但是 参考系变成了grid2D() 先求在一个面片里的行列号 边界处有错误的话 在后面改写
+			DgLocVector ngh2d(idgg().grid2D());
+			idgg().grid2D().setAddNeighbors(add.coord(), ngh2d);
+			int q = add.quadNum();
+			DgLocVector ngh2dNoDup(idgg());//开始处理跨面
+			DgIVec2D c;
+			for (int i = 0; i < ngh2d.size(); i++)
 			{
-				for (int i = 0; i < ngh2dNoDup.size(); i++)
+				DgQ2DICoord c2di(q, *idgg().grid2D().getAddress(ngh2d[i])); //这个时候是有错误的 因为他包含了边界点
+				const DgBoundedIDGG& bndRF =idgg().bndRF();
+				c2di = bndRF.q2dixToQ2di(c2di);//纠正错误的边界编码
+				// check for duplicates
+				bool keeper = true;
+				if (!idgg().isCongruent() && add.coord() == DgIVec2D(0, 0))
 				{
-					const DgQ2DICoord& veci = *idgg().getAddress(ngh2dNoDup[i]);
-	//cout << "   " << i << " " << veci << " -> " << (c2di == veci) <<  endl;
-					if (c2di == veci) 
+					for (int i = 0; i < ngh2dNoDup.size(); i++)
 					{
-						keeper = false;
-						break;
+						const DgQ2DICoord& veci = *idgg().getAddress(ngh2dNoDup[i]);
+						if (c2di == veci) 
+						{
+							keeper = false;
+							break;
+						}
 					}
 				}
-			}
+				if (keeper)
+				{
 
-			if (keeper)
-			{
-
-				vec.push_back(c2di);
-				// DgLocation* tmpLoc = idgg().makeLocation(c2di);
-				// ngh2dNoDup.push_back(*tmpLoc);
-				// delete tmpLoc;
+					vec.push_back(c2di);
+				}
 			}
+			return vec;
+
 		}
-		// for (int i = 0; i < ngh2dNoDup.size(); i++)
-		// 	vec.push_back(ngh2dNoDup[i]);
-		// for (int i = 0; i < ngh2dNoDup.size(); i++)
-		// 	vec.push_back(ngh2dNoDup[i]);
-	return vec;
+	
 }
 
 vector<DgQ2DICoord> calDgg::dmdneicell(const DgQ2DICoord &add1) const
@@ -1111,6 +1191,56 @@ calDgg::calDgg(  const DgIDGGBase &idgg) : IDGG_(idgg)
 
 }
 
+
+
+// void outchunk(string outFileName ,vector<results> resus,vector<string> names )
+// {
+// 		// vector<DgQ2DICoord> adds =getQDIfromfile(inFileName,inAddType,outAddType);
+// 		// calonefile(adds);
+//         // shared_ptr<ofstream> pOutFile(new DgOutputStream(outFileName, "", DgBase::Fatal));
+//         // ofstream& outFile = *pOutFile;
+// 		std::ofstream outFile(outFileName,std::ios_base::app); // 创建 ofstream 并打开文件
+// 		if (!outFile.is_open()) 
+// 		{ // 检查文件是否成功打开
+//         	std::cerr << " result2file Failed to open file " <<outFileName<< std::endl;
+// 			exit(0);
+// 		}
+// 		//首先输入标题
+// 		// const char* title = " name , area , per , zsc , disminmax ,disavg , angleminmax , angleavg , csdminmax , csdavg ";
+// 		// outFile<<title<<endl;
+// 		for(int i =0;i<resus.size() ;i++)
+// 		{
+// 			outFile<<names[i];
+// 			outFile<<outputDelimiter<<resus[i].area;
+// 			outFile<<outputDelimiter<<resus[i].per;
+// 			outFile<<outputDelimiter<<resus[i].zsc;
+// 			outFile<<outputDelimiter<<resus[i].disminmax;
+// 			outFile<<outputDelimiter<<resus[i].disavg;
+// 			outFile<<outputDelimiter<<resus[i].angleminmax;
+// 			outFile<<outputDelimiter<<resus[i].angleavg;
+// 			outFile<<outputDelimiter<<resus[i].csdminmax;
+// 			outFile<<outputDelimiter<<resus[i].csdavg;
+// 			outFile<<endl;
+// 		}
+// 		// for(int index =0;index<resus.size() ;index++)
+// 		// {
+// 		// 	outFile<<resu.name;
+// 		// 	outFile<<outputDelimiter<<resu.area;
+// 		// 	outFile<<outputDelimiter<<resu.per;
+// 		// 	outFile<<outputDelimiter<<resu.zsc;
+// 		// 	outFile<<outputDelimiter<<resu.disminmax;
+// 		// 	outFile<<outputDelimiter<<resu.disavg;
+// 		// 	outFile<<outputDelimiter<<resu.angleminmax;
+// 		// 	outFile<<outputDelimiter<<resu.angleavg;
+// 		// 	outFile<<outputDelimiter<<resu.csdminmax;
+// 		// 	outFile<<outputDelimiter<<resu.csdavg;
+// 		// 	outFile<<endl;
+// 		// }
+// 		//循环输入文件
+//    		outFile.close();
+// }
+
+
 /// @brief 
 /// @param outFileName  输出的文件名 
 /// @param outputDelimiter 输出所用的间隔符
@@ -1118,53 +1248,135 @@ calDgg::calDgg(  const DgIDGGBase &idgg) : IDGG_(idgg)
 /// @param inAddType 输入的编码类型 见DGGRID 能够作为输入的编码
 /// @param outAddType 输出的编码类型 默认且必须是"Q2DI"
 /// @param suffix 输入文件的后缀名
-void calDgg::result2file(string outFileName, char outputDelimiter,string inFilepath, string inAddType,string outAddType,string suffix  ) const
+void calDgg::result2file(string outFileName, char outputDelimiter,string inFilePath, string inAddType,string outAddType,string suffix,int ptsPerEdgeDensify  ) const
 {
-        // shared_ptr<ofstream> pOutFile(new DgOutputStream(outFileName, "", DgBase::Fatal));
-        // ofstream& outFile = *pOutFile;
-		 std::ofstream outFile(outFileName); // 创建 ofstream 并打开文件
+
+		vector <string> paths =this->getfilName(inFilePath,suffix);
+		vector<results> resus;
+		vector<string> names;
+		vector<string> filenames;
+		// vector<DgQ2DICoord> adds;
+		// for(int i =0;i< paths.size(); i++)
+		// {
+		// 	fs::path fspath(paths[i]);
+		// 	std::string filename = fspath.filename().string();
+		// 	string name = getbasename(filename);
+		// 	names.push_back(name);
+		// 	filenames.push_back(paths[i]);
+		// }
+		// int num_threads = 4;
+
+		// #pragma omp parallel num_threads(num_threads)
+		// #pragma omp parallel 
+
+		{
+			int thread_id = omp_get_thread_num();
+			int num_threads = omp_get_num_threads();
+			// #pragma omp for
+			for(int i =0;i< filenames.size(); i++)
+			{
+				// #pragma omp critical
+				// {
+				std::cout << "result2file Thread " << thread_id << " of " << num_threads   << " "<<filenames[i]<<std::endl;
+					// adds =this->getQDIfromfile(filenames[i]);
+					// adds.empty();
+				string path =filenames[i];
+				// this->getQDIfromfile(path);
+				// }
+				results resu =this->calonefile(this->getQDIfromfile(path), ptsPerEdgeDensify);
+				// #pragma omp critical
+				{
+					resus.push_back(resu);
+				}
+			}
+		}
+		std::ofstream outFile(outFileName); // 创建 ofstream 并打开文件
 		if (!outFile.is_open()) 
 		{ // 检查文件是否成功打开
-        	std::cerr << "Failed to open file!" <<outFileName<< std::endl;
+        	std::cerr << " result2file Failed to open file " <<outFileName<< std::endl;
+			exit(0);
 		}
+
 		//首先输入标题
+ 
 		const char* title = " name , area , per , zsc , disminmax ,disavg , angleminmax , angleavg , csdminmax , csdavg ";
 		outFile<<title<<endl;
-		//循环输入文件
-		vector <string> paths =this->getfilName(inFilepath,suffix);
-		for(auto path : paths)
+		for(int i =0;i<resus.size() ;i++)
 		{
-			cout<<path<<endl;
-			fs::path fspath(path);
-    		std::string filename = fspath.filename().string();
-			vector<DgQ2DICoord> adds =this->getQDIfromfile(path);
-			results resu =this->calonefile(adds);
+			outFile<<names[i];
+			outFile<<outputDelimiter<<resus[i].area;
+			outFile<<outputDelimiter<<resus[i].per;
+			outFile<<outputDelimiter<<resus[i].zsc;
 
-			outFile<<filename;
-			outFile<<outputDelimiter<<resu.area;
-			outFile<<outputDelimiter<<resu.per;
-			outFile<<outputDelimiter<<resu.zsc;
+			outFile<<outputDelimiter<<resus[i].disminmax;
+			outFile<<outputDelimiter<<resus[i].disavg;
 
-			outFile<<outputDelimiter<<resu.disminmax;
-			outFile<<outputDelimiter<<resu.disavg;
+			outFile<<outputDelimiter<<resus[i].angleminmax;
+			outFile<<outputDelimiter<<resus[i].angleavg;
 
-			outFile<<outputDelimiter<<resu.angleminmax;
-			outFile<<outputDelimiter<<resu.angleavg;
-
-			outFile<<outputDelimiter<<resu.csdminmax;
-			outFile<<outputDelimiter<<resu.csdavg;
+			outFile<<outputDelimiter<<resus[i].csdminmax;
+			outFile<<outputDelimiter<<resus[i].csdavg;
 			outFile<<endl;
-
-
 		}
-		// vector<DgQ2DICoord> adds =getQDIfromfile(inFileName,inAddType,outAddType);
-
-		// calonefile(adds);
-
    		outFile.close();
 
 }
 
+void calDgg::result2file1(string outFileName, char outputDelimiter, string inFilePath, string inAddType, string outAddType, string suffix, int ptsPerEdgeDensify) const
+{
+		vector <string> paths =this->getfilName(inFilePath,suffix);
+		vector<cloumnsdata> cdatas(paths.size());
+		// vector<DgQ2DICoord> adds;
+		for(auto ii =0;ii< paths.size(); ii++)
+		{
+			cdatas[ii].setname(paths[ii]);
+			cdatas[ii].adds =this->getQDIfromfile(paths[ii]);
+		}
+  		// omp_set_num_threads(10);
+		// #pragma omp parallel  
+		{
+			int thread_id = omp_get_thread_num();
+			int num_threads = omp_get_num_threads();
+			// #pragma omp for  
+			for(auto i =0; i<cdatas.size(); i++)
+			// for(auto i =0; i<10; i++)
+			{
+				// #pragma omp critical
+				{
+					std::cout << i<<" result2file Thread " << thread_id << " of " << num_threads   << " "<<cdatas[i].name<<std::endl;
+				}
+				cdatas[i].resu =this->calonefile(cdatas[i].adds, ptsPerEdgeDensify);
+			}
+
+		} 
+		std::ofstream outFile (outFileName); // 创建 ofstream 并打开文件
+		if (!outFile.is_open()) 
+		{ // 检查文件是否成功打开
+        	std::cerr << " result2file Failed to open file " <<outFileName<< std::endl;
+			exit(0);
+		}
+		const char* title = " name , area , per , zsc , disminmax ,disavg , angleminmax , angleavg , csdminmax , csdavg ";
+		outFile<<title<<endl;
+		for(int i =0;i<cdatas.size() ;i++)
+		{
+			outFile<<cdatas[i].name;
+			outFile<<outputDelimiter<<cdatas[i].resu.area;
+			outFile<<outputDelimiter<<cdatas[i].resu.per;
+			outFile<<outputDelimiter<<cdatas[i].resu.zsc;
+
+			outFile<<outputDelimiter<<cdatas[i].resu.disminmax;
+			outFile<<outputDelimiter<<cdatas[i].resu.disavg;
+
+			outFile<<outputDelimiter<<cdatas[i].resu.angleminmax;
+			outFile<<outputDelimiter<<cdatas[i].resu.angleavg;
+
+			outFile<<outputDelimiter<<cdatas[i].resu.csdminmax;
+			outFile<<outputDelimiter<<cdatas[i].resu.csdavg;
+			outFile<<endl;
+		}
+   		outFile.close();
+		// cdatas.empty();
+}
 
 vector<DgQ2DICoord> calDgg::getQDIfromfile (string inFileName,    string inAddType ,string outAddType  )  const
 {
@@ -1172,7 +1384,7 @@ vector<DgQ2DICoord> calDgg::getQDIfromfile (string inFileName,    string inAddTy
 		// set-up to convert to degrees
 	DgGeoSphDegRF::makeRF(dgg.geoRF(), dgg.geoRF().name() + "Deg");
 	// set-up the input reference frame
-	const char* calValstr = "test remainder,test ,";
+	// const char* calValstr = "test remainder,test ,";
 	bool inSeqNum = false;
 	const DgRFBase* pInRF = NULL;
 	if (inAddType == "GEO") pInRF = &dgg.geoRF();
@@ -1245,6 +1457,7 @@ vector<DgQ2DICoord> calDgg::getQDIfromfile (string inFileName,    string inAddTy
 		const DgQ2DICoord add = static_cast<const DgAddress<DgQ2DICoord>*>(loc->address())->address();
 		adds.push_back(add);
 		delete loc;
+		loc = NULL;
 
 	}
 	inFile.close();
@@ -1268,6 +1481,7 @@ vector<string> calDgg::getfilName(string inFilePath, string suffix) const
             }
         }
         closedir(dir);
+		return absfilenames;
     }
     else
     {
@@ -1303,9 +1517,11 @@ results calDgg::calonefile(vector<DgQ2DICoord> adds,int ptsPerEdgeDensify) const
 
 	 for(auto add : adds)
 	 {
-		areas.push_back( this->calarea(add,ptsPerEdgeDensify));
-		pers.push_back(this->calper(add,ptsPerEdgeDensify));
-		zscs.push_back(this->calzsc(add,ptsPerEdgeDensify));
+		long double area =this->calarea(add,ptsPerEdgeDensify);
+		long double per = this->calper(add,ptsPerEdgeDensify);
+		areas.push_back( area);
+		pers.push_back(per);
+		zscs.push_back(this->calzsc(area,per));
 		// cout<<"1"<<endl;
 
 		vector<long double> disvec = this->calmaxmintotaldis(add);

@@ -150,7 +150,7 @@ vector<DgQ2DICoord>  trans2QDI (string inFileName,  const DgIDGGBase& dgg ,strin
       // set-up to convert to degrees
    DgGeoSphDegRF::makeRF(dgg.geoRF(), dgg.geoRF().name() + "Deg");
    // set-up the input reference frame
-   const char* calValstr = "test remainder,test ,";
+   // const char* calValstr = "test remainder,test ,";
    bool inSeqNum = false;
    const DgRFBase* pInRF = NULL;
    if (inAddType == "GEO") pInRF = &dgg.geoRF();

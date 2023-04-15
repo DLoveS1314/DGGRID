@@ -9,10 +9,12 @@
 #include <dglib/DgIDGGutil.h>
 #include <memory>
 #include <math.h>
-
+#include <filesystem>
+namespace fs = std::filesystem;
 class  results 
 {
     public:
+ 
          long double area;//面积
          long double per;//周长
          long double zsc;//紧致度
@@ -28,29 +30,48 @@ class  results
 
         results()
         {
-
+             
         }
     /* data */
 };
-
-
+ 
+class cloumnsdata//记录一行数据
+{
+    public://都有默认参数不用赋值了
+        results resu;
+        vector<DgQ2DICoord> adds;
+        string name;
+        void setname(string path)
+        {
+            fs::path fspath(path);
+			std::string filename = fspath.filename().string();
+			this->name = this->getbasename(filename);
+        };
+        string getbasename(string filename)
+        {
+            std::size_t last_dot_pos = filename.find_last_of(".");
+            if (last_dot_pos == std::string::npos) {
+                std::cout << "No file extension found" << std::endl;
+                exit(0);
+            }
+            std::string basename = filename.substr(0, last_dot_pos);
+            return basename;
+        };
+};
 class calDgg {
 public:
     calDgg( const DgIDGGBase &idgg);
 
 
     //高级层 直接读取数据 进行各种功能统计与计算
-    void result2file( string outFileName, char outputDelimiter,string inFilePath,    string inAddType = "SEQNUM",string outAddType = "Q2DI",string suffix="csv") const ;
-    
+    void result2file( string outFileName, char outputDelimiter,string inFilePath,    string inAddType = "SEQNUM",string outAddType = "Q2DI",string suffix="csv",int ptsPerEdgeDensify=0) const ;
+    void result2file1( string outFileName, char outputDelimiter,string inFilePath,    string inAddType = "SEQNUM",string outAddType = "Q2DI",string suffix="csv",int ptsPerEdgeDensify=0) const ;
     vector<DgQ2DICoord>  getQDIfromfile (  string inFileName,    string inAddType = "SEQNUM",string outAddType = "Q2DI" ) const;
     vector<string > getfilName( string inFilePath, string suffix ) const ;
     results calonefile(vector<DgQ2DICoord> adds ,int ptsPerEdgeDensify=0) const ;
-
+ 
     // result2file的简化版 只能读取seqnum
     vector<DgQ2DICoord> readadd(string path ) const ;
-
-
-
     static bool useearthRadius; //统一规定是否使用地球半径 涉及面积、周长、边长等函数
     //计算层 
     const DgIDGGBase& idgg (void) const { return IDGG_; } 
@@ -60,6 +81,10 @@ public:
     long double calper(const DgQ2DICoord& add,int ptsPerEdgeDensify=0) const;
     //计算紧致度
     long double calzsc(const DgQ2DICoord &add, int ptsPerEdgeDensify = 0) const;
+
+ 
+    long double calzsc(const double area, const double per) const;
+
     //计算邻近格点最大最小边比 和距离均值 先返回最大最小比 再返回均值
     vector<long double>  calmaxmintotaldis(const DgQ2DICoord& add) const;
     //计算邻近格点最大最小角度比 和角度均值 先返回最大最小比 再返回均值 单位弧度制
@@ -68,11 +93,16 @@ public:
     计算的是两中点重合度 A comparison of intercell metrics on discrete global grid systems fig2
     */
     vector<long double>  calmaxmintotalcsd(const DgQ2DICoord& add) const;
-
- 
-
-
     //基础层 
+
+    // 计算方位角
+    long double calAzimuth(const GeoCoord&   pt1, const GeoCoord&   pt2) const;
+    long double calAzimuth(const DgGeoCoord& pt1, const DgGeoCoord& pt2) const;
+
+    
+    // 以add作为p1点，周边的点作为p2点 计算方位角
+    vector<long double >  sortByAzimuth( const DgQ2DICoord& add ,const DgLocVector locs ) const ;
+
     // 得到多边形顶点(经纬度坐标)
     void setAddVertices (const DgQ2DICoord& add,
                                    DgPolygon& vec, int densify=0) const;
@@ -88,7 +118,7 @@ public:
                      const GeoCoord& sv21, const GeoCoord& sv22, int sign=1) const;
     DgGeoCoord calintersect(const DgGeoCoord& sv11, const DgGeoCoord& sv12,
                      const DgGeoCoord& sv21, const DgGeoCoord& sv22, int sign=1) const;
-    // 计算临近 后续添加所有格网的临近 这里只实现了菱形的八邻近
+    // 计算临近 按照方位角进行排序
     void calnei (const DgQ2DICoord& add,
                                    DgLocVector& vec) const;
     // 计算以当前编码为中心的两个临近编码练成的二面角
@@ -97,7 +127,7 @@ public:
     // 计算周长  long double calarea()const;
     long double  calangle (const DgQ2DICoord& center,
                            const DgQ2DICoord& add1,const DgQ2DICoord& add2) const;
-    // 四邻域在求中心点时需要
+    // 四邻域在求中心点时需要 
     vector<DgQ2DICoord> edgecell(const DgQ2DICoord& add1 ) const;
 
     // 生成菱形四邻域和八邻域

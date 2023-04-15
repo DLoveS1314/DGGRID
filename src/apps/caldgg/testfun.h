@@ -29,7 +29,7 @@ void testIDGGbounds()
 
     long double azimuth = 0.0L;
     const DgIDGGS4D * idggsDPtr = DgIDGGS4D::makeRF(net0, geoRF, vert0, azimuth, 10,"ISEA4D_D4","ISEA",dgg::topo::D4);
-    const DgIDGGS4D& idggs = *idggsDPtr;
+    // const DgIDGGS4D& idggs = *idggsDPtr;
     const DgBoundedIDGGS dgBoundedIdggs = DgBoundedIDGGS(*idggsDPtr);
     DgResAdd<DgQ2DICoord>  add = DgResAdd ( DgQ2DICoord (1, DgIVec2D(3,5)) ,  3);
     unsigned long long int seqnum = dgBoundedIdggs.seqNumAddress(add);
@@ -192,6 +192,7 @@ int testiteratefile()//测试遍历文件夹中的文件
     {
         cout<<path<<endl;
     }
+    return 1;
 }
 
 void testresult2file()
